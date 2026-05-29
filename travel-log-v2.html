@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Travel Log">
+<meta name="theme-color" content="#fafaf7">
+<title>Travel Log</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""/>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    background: #fafaf7;
+    color: #1c1c1e;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  #screens { flex: 1; position: relative; overflow: hidden; }
+  .screen {
+    position: absolute; inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 18px 90px;
+  }
+  .screen.hidden { display: none; }
+  h1 { margin: 2px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
+  .kicker { margin: 0; font-size: 11px; color: #8a8a8e; letter-spacing: 1.2px; font-weight: 500; }
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 18px; padding-top: 8px;
+  }
+  .pill-btn {
+    background: #fff; border: 0.5px solid #d8d8d4;
+    color: #1c1c1e; border-radius: 10px;
+    padding: 8px 12px; font-size: 13px;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .pill-btn:active { background: #f0f0ec; }
+  .accent-btn {
+    background: #c2693c; color: #fff; border: 0;
+    border-radius: 10px; padding: 8px 14px; font-size: 13px;
+    font-weight: 500; cursor: pointer; font-family: inherit;
+  }
+  .accent-btn:active { background: #a85629; }
+  .card {
+    background: #fff; border: 0.5px solid #e4e4df;
+    border-radius: 16px; padding: 14px;
+    margin-bottom: 12px; cursor: pointer;
+  }
+  .card:active { background: #faf9f5; }
+  .card-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #8a8a8e; margin-bottom: 8px;
+  }
+  .card-meta .ti { font-size: 14px; color: #c2693c; }
+  .card-meta .spacer { margin-left: auto; }
+  .card img { width: 100%; display: block; border-radius: 10px; margin-bottom: 10px; max-height: 240px; object-fit: cover; }
+  .card p { margin: 0; font-size: 14px; line-height: 1.55; color: #2c2c2e; }
+  .tag-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .tag {
+    font-size: 10px; padding: 3px 8px;
+    background: #f0eee8; color: #6b6b6e;
+    border-radius: 10px; letter-spacing: 0.3px;
+  }
+  .empty { text-align: center; padding: 80px 24px; color: #8a8a8e; }
+  .empty .ti { font-size: 44px; color: #c8c8c0; }
+  .empty p { margin: 14px 0 4px; font-size: 15px; color: #4a4a4e; }
+  .empty .hint { font-size: 13px; color: #8a8a8e; }
+
+  .new-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px; padding-top: 4px;
+  }
+  .new-header p { margin: 0; font-size: 15px; font-weight: 600; }
+  .icon-btn { background: transparent; border: 0; color: #8a8a8e; cursor: pointer; padding: 4px; }
+  .form-row {
+    width: 100%; background: #fff;
+    border: 0.5px solid #d8d8d4; color: #1c1c1e;
+    padding: 12px 14px; border-radius: 12px;
+    font-size: 14px; font-family: inherit;
+    margin-bottom: 10px;
+  }
+  .form-row:focus { outline: none; border-color: #c2693c; }
+  textarea.form-row { min-height: 130px; resize: none; line-height: 1.6; }
+  .gps-btn {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 14px;
+  }
+  .gps-btn .ti { color: #c2693c; font-size: 18px; }
+  .gps-btn .arrow { margin-left: auto; color: #b0b0b4; font-size: 12px; }
+  .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .media-btn {
+    background: #fff; border: 0.5px solid #d8d8d4;
+    color: #1c1c1e; padding: 18px 10px; border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  .media-btn:active { background: #f0f0ec; }
+  .media-btn .ti { font-size: 20px; color: #c2693c; }
+  .preview { margin-top: 10px; border-radius: 12px; overflow: hidden; }
+  .preview img { width: 100%; display: block; }
+  .audio-preview {
+    margin-top: 10px; padding: 12px;
+    background: #fff; border: 0.5px solid #d8d8d4;
+    border-radius: 12px;
+  }
+  .audio-preview audio { width: 100%; }
+  .tip { margin-top: 18px; font-size: 12px; color: #8a8a8e; line-height: 1.5; }
+
+  .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-top: 4px; }
+  .detail-loc {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #c2693c; margin-bottom: 14px; font-weight: 500;
+  }
+  .detail-photo { margin-bottom: 16px; border-radius: 14px; overflow: hidden; }
+  .detail-photo img { width: 100%; display: block; }
+  .detail-text { margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #1c1c1e; }
+  .detail-audio { width: 100%; margin-bottom: 16px; }
+  .detail-date { margin: 14px 0 0; font-size: 12px; color: #8a8a8e; }
+
+  /* MAP SCREEN — now a real Leaflet map */
+  #map-screen { padding: 0; }
+  #leaflet-map {
+    width: 100%; height: 100%;
+    background: #eef0e8;
+  }
+  .map-top-bar {
+    position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 14px; right: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .map-top-bar > * { pointer-events: auto; }
+  .map-chip {
+    background: rgba(255,255,255,0.95); border: 0.5px solid #d8d8d4;
+    color: #1c1c1e; border-radius: 10px; padding: 8px 12px;
+    font-size: 13px; backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer; font-family: inherit;
+  }
+  .map-empty {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: #8a8a8e; pointer-events: none; z-index: 999;
+    background: rgba(250,250,247,0.92);
+  }
+  .map-empty .ti { font-size: 44px; color: #c8c8c0; }
+  .map-empty p { margin: 14px 0 4px; font-size: 14px; color: #4a4a4e; }
+  .map-empty .hint { font-size: 12px; color: #8a8a8e; }
+
+  /* Custom Leaflet marker */
+  .custom-pin {
+    width: 22px; height: 22px;
+    background: #c2693c;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  .leaflet-popup-content {
+    margin: 12px 14px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 220px;
+  }
+  .popup-place {
+    font-weight: 600; color: #c2693c;
+    margin: 0 0 4px; font-size: 12px;
+  }
+  .popup-text {
+    margin: 0 0 6px; color: #2c2c2e;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .popup-link {
+    color: #c2693c; font-size: 12px;
+    text-decoration: none; font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: rgba(250,250,247,0.94);
+    border-top: 0.5px solid #d8d8d4;
+    display: flex; align-items: center; justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom);
+    backdrop-filter: blur(12px);
+    z-index: 1001;
+  }
+  .tab {
+    background: transparent; border: 0;
+    color: #8a8a8e; display: flex; flex-direction: column;
+    align-items: center; gap: 2px; font-size: 10px;
+    cursor: pointer; font-family: inherit; padding: 4px 12px;
+  }
+  .tab .ti { font-size: 22px; }
+  .tab.active { color: #c2693c; }
+  .tab-new {
+    background: #c2693c; border: 0;
+    width: 52px; height: 52px; border-radius: 50%;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; margin-top: -22px;
+    box-shadow: 0 4px 14px rgba(194,105,60,0.35);
+  }
+  .tab-new:active { background: #a85629; }
+  .tab-new .ti { font-size: 24px; }
+
+  audio { height: 36px; }
+  input[type=file] { display: none; }
+</style>
+</head>
+<body>
+
+<div id="screens">
+
+  <!-- FEED -->
+  <div class="screen" data-screen="feed">
+    <div class="header">
+      <div>
+        <p class="kicker">JOURNAL</p>
+        <h1 id="feed-title">Your entries</h1>
+      </div>
+      <button class="pill-btn" data-go="map"><i class="ti ti-map-2"></i> Map</button>
+    </div>
+    <div id="entries-list"></div>
+    <div id="empty-state" class="empty">
+      <i class="ti ti-notebook"></i>
+      <p>No entries yet</p>
+      <p class="hint">Tap + to write your first one.</p>
+    </div>
+  </div>
+
+  <!-- NEW -->
+  <div class="screen hidden" data-screen="new">
+    <div class="new-header">
+      <button class="icon-btn" data-go="feed"><i class="ti ti-x" style="font-size:22px;"></i></button>
+      <p>New entry</p>
+      <button class="accent-btn" id="save-btn">Save</button>
+    </div>
+
+    <button class="form-row gps-btn" id="gps-btn">
+      <i class="ti ti-map-pin"></i>
+      <span id="gps-text">Tag this location</span>
+      <span class="arrow">Use GPS ›</span>
+    </button>
+
+    <input id="place-name" class="form-row" placeholder="Place name (optional)" />
+
+    <textarea id="entry-text" class="form-row" placeholder="What's it like? What are you feeling?"></textarea>
+
+    <div id="photo-preview" class="preview" style="display:none;"></div>
+    <div id="audio-preview" class="audio-preview" style="display:none;"></div>
+
+    <div class="media-grid">
+      <label class="media-btn">
+        <i class="ti ti-camera"></i>
+        <span>Add photo</span>
+        <input type="file" id="photo-input" accept="image/*" capture="environment" />
+      </label>
+      <button class="media-btn" id="record-btn">
+        <i class="ti ti-microphone" id="rec-icon"></i>
+        <span id="rec-label">Record audio</span>
+      </button>
+    </div>
+
+    <p class="tip">Tip: tap the mic on the iPhone keyboard to dictate into the text field.</p>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="screen hidden" data-screen="detail">
+    <div class="detail-header">
+      <button class="icon-btn" data-go="feed"><i class="ti ti-arrow-left" style="font-size:22px;"></i></button>
+      <button class="icon-btn" id="delete-btn"><i class="ti ti-trash" style="font-size:20px;"></i></button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="screen hidden" data-screen="map" id="map-screen">
+    <div id="leaflet-map"></div>
+    <div class="map-top-bar">
+      <button class="map-chip" data-go="feed"><i class="ti ti-arrow-left" style="font-size:13px; vertical-align:-2px;"></i> Back</button>
+      <span class="map-chip" id="map-count" style="cursor: default;">0 pins</span>
+    </div>
+    <div id="map-empty" class="map-empty">
+      <i class="ti ti-map-pin-off"></i>
+      <p>No GPS-tagged entries yet</p>
+      <p class="hint">Tag a location when you create an entry.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" data-tab="feed"><i class="ti ti-notebook"></i>Journal</button>
+  <button class="tab-new" data-new><i class="ti ti-plus"></i></button>
+  <button class="tab" data-tab="map"><i class="ti ti-map-2"></i>Map</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'travel_log_entries_v1';
+  let entries = [];
+  let draft = { text: '', placeName: '', gps: null, photo: null, audio: null };
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let isRecording = false;
+  let leafletMap = null;
+  let markersLayer = null;
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) entries = JSON.parse(raw);
+  } catch(e) { entries = []; }
+
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+    catch(e) { alert('Storage limit reached. Older entries may need to be removed.'); }
+    renderFeed();
+    if (leafletMap) renderMapPins();
+  }
+
+  function show(name) {
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.toggle('hidden', s.dataset.screen !== name);
+    });
+    document.querySelectorAll('[data-tab]').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === name);
+    });
+    if (name === 'map') initOrUpdateMap();
+  }
+
+  function fmtDate(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString())
+      return d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    const yest = new Date(now); yest.setDate(yest.getDate()-1);
+    if (d.toDateString() === yest.toDateString()) return 'Yesterday';
+    const sameYear = d.getFullYear() === now.getFullYear();
+    return d.toLocaleDateString([], sameYear ? {month:'short', day:'numeric'} : {year:'numeric', month:'short', day:'numeric'});
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderFeed() {
+    const list = document.getElementById('entries-list');
+    const empty = document.getElementById('empty-state');
+    const title = document.getElementById('feed-title');
+    list.innerHTML = '';
+    if (entries.length === 0) {
+      empty.style.display = 'block';
+      title.textContent = 'Your entries';
+      return;
+    }
+    empty.style.display = 'none';
+    title.textContent = entries.length + (entries.length === 1 ? ' entry' : ' entries');
+    const sorted = [...entries].sort((a,b) => b.ts - a.ts);
+    sorted.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.addEventListener('click', () => openDetail(e.id));
+      const tags = [];
+      if (e.photo) tags.push('photo');
+      if (e.audio) tags.push('audio');
+      if (e.text) tags.push('written');
+      const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
+      const metaHtml = locText
+        ? '<div class="card-meta"><i class="ti ti-map-pin"></i><span>'+escapeHtml(locText)+'</span><span class="spacer">'+fmtDate(e.ts)+'</span></div>'
+        : '<div class="card-meta"><span class="spacer">'+fmtDate(e.ts)+'</span></div>';
+      const photoHtml = e.photo ? '<img src="'+e.photo+'"/>' : '';
+      const textHtml = e.text ? '<p>'+escapeHtml(e.text)+'</p>' : '';
+      const audioOnlyHtml = (e.audio && !e.text) ? '<div style="display:flex; align-items:center; gap:8px; padding:10px; background:#faf9f5; border-radius:10px;"><i class="ti ti-volume" style="font-size:16px; color:#c2693c;"></i><span style="font-size:13px; color:#6b6b6e;">Audio note</span></div>' : '';
+      const tagsHtml = tags.length ? '<div class="tag-row">' + tags.map(t => '<span class="tag">'+t+'</span>').join('') + '</div>' : '';
+      card.innerHTML = metaHtml + photoHtml + textHtml + audioOnlyHtml + tagsHtml;
+      list.appendChild(card);
+    });
+  }
+
+  function openDetail(id) {
+    const e = entries.find(x => x.id === id);
+    if (!e) return;
+    const c = document.getElementById('detail-content');
+    const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(4)+', '+e.gps.lng.toFixed(4) : '');
+    const locHtml = locText ? '<div class="detail-loc"><i class="ti ti-map-pin"></i><span>'+escapeHtml(locText)+'</span></div>' : '';
+    const photoHtml = e.photo ? '<div class="detail-photo"><img src="'+e.photo+'"/></div>' : '';
+    const textHtml = e.text ? '<p class="detail-text">'+escapeHtml(e.text)+'</p>' : '';
+    const audioHtml = e.audio ? '<audio controls src="'+e.audio+'" class="detail-audio"></audio>' : '';
+    const dateHtml = '<p class="detail-date">'+new Date(e.ts).toLocaleString()+'</p>';
+    c.innerHTML = locHtml + photoHtml + textHtml + audioHtml + dateHtml;
+    document.getElementById('delete-btn').onclick = () => {
+      if (!confirm('Delete this entry?')) return;
+      entries = entries.filter(x => x.id !== id);
+      persist();
+      show('feed');
+    };
+    show('detail');
+  }
+
+  function initOrUpdateMap() {
+    if (!leafletMap) {
+      leafletMap = L.map('leaflet-map', {
+        zoomControl: false,
+        attributionControl: true
+      }).setView([20, 0], 2);
+      L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(leafletMap);
+      markersLayer = L.layerGroup().addTo(leafletMap);
+    } else {
+      // re-trigger size calc in case the screen was hidden when we made the map
+      setTimeout(() => leafletMap.invalidateSize(), 100);
+    }
+    renderMapPins();
+  }
+
+  function renderMapPins() {
+    if (!markersLayer) return;
+    markersLayer.clearLayers();
+    const geo = entries.filter(e => e.gps);
+    const count = document.getElementById('map-count');
+    const empty = document.getElementById('map-empty');
+    count.textContent = geo.length + (geo.length === 1 ? ' pin' : ' pins');
+    if (geo.length === 0) { empty.style.display = 'flex'; return; }
+    empty.style.display = 'none';
+
+    const customIcon = L.divIcon({
+      className: '',
+      html: '<div class="custom-pin"></div>',
+      iconSize: [22, 22],
+      iconAnchor: [11, 11]
+    });
+
+    const bounds = [];
+    geo.forEach(e => {
+      const marker = L.marker([e.gps.lat, e.gps.lng], { icon: customIcon }).addTo(markersLayer);
+      const place = e.placeName || (e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3));
+      const snippet = e.text ? (e.text.length > 120 ? e.text.slice(0,120)+'…' : e.text) : (e.audio ? 'Audio note' : 'Tagged location');
+      const popupHtml =
+        '<p class="popup-place">'+escapeHtml(place)+'</p>' +
+        '<p class="popup-text">'+escapeHtml(snippet)+'</p>' +
+        '<a class="popup-link" data-open-id="'+e.id+'">Open entry ›</a>';
+      marker.bindPopup(popupHtml);
+      marker.on('popupopen', (ev) => {
+        const link = ev.popup._contentNode.querySelector('[data-open-id]');
+        if (link) link.addEventListener('click', () => openDetail(e.id));
+      });
+      bounds.push([e.gps.lat, e.gps.lng]);
+    });
+
+    if (bounds.length === 1) {
+      leafletMap.setView(bounds[0], 13);
+    } else {
+      leafletMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
+    }
+  }
+
+  function resetDraft() {
+    draft = { text: '', placeName: '', gps: null, photo: null, audio: null };
+    document.getElementById('entry-text').value = '';
+    document.getElementById('place-name').value = '';
+    document.getElementById('gps-text').textContent = 'Tag this location';
+    const pp = document.getElementById('photo-preview');
+    pp.style.display = 'none'; pp.innerHTML = '';
+    const ap = document.getElementById('audio-preview');
+    ap.style.display = 'none'; ap.innerHTML = '';
+    document.getElementById('rec-label').textContent = 'Record audio';
+    document.getElementById('rec-icon').className = 'ti ti-microphone';
+    document.getElementById('rec-icon').style.color = '#c2693c';
+  }
+
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.go)));
+  document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.tab)));
+  document.querySelector('[data-new]').addEventListener('click', () => { resetDraft(); show('new'); });
+
+  document.getElementById('gps-btn').addEventListener('click', () => {
+    const t = document.getElementById('gps-text');
+    t.textContent = 'Getting location…';
+    if (!navigator.geolocation) { t.textContent = 'GPS not available on this device'; return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        draft.gps = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        t.textContent = draft.gps.lat.toFixed(4) + ', ' + draft.gps.lng.toFixed(4);
+      },
+      err => {
+        if (err.code === 1) t.textContent = 'Location permission denied';
+        else if (err.code === 2) t.textContent = 'Location unavailable';
+        else if (err.code === 3) t.textContent = 'Location timed out — try again';
+        else t.textContent = 'Could not get location';
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  });
+
+  document.getElementById('photo-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1400;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = h * (maxDim / w); w = maxDim; }
+          else { w = w * (maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        draft.photo = canvas.toDataURL('image/jpeg', 0.82);
+        const p = document.getElementById('photo-preview');
+        p.innerHTML = '<img src="'+draft.photo+'"/>';
+        p.style.display = 'block';
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('record-btn').addEventListener('click', async () => {
+    if (isRecording) { mediaRecorder.stop(); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = ev => {
+          draft.audio = ev.target.result;
+          const ap = document.getElementById('audio-preview');
+          ap.innerHTML = '<audio controls src="'+draft.audio+'"></audio>';
+          ap.style.display = 'block';
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+        isRecording = false;
+        document.getElementById('rec-label').textContent = 'Re-record';
+        document.getElementById('rec-icon').className = 'ti ti-microphone';
+        document.getElementById('rec-icon').style.color = '#c2693c';
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      document.getElementById('rec-label').textContent = 'Stop';
+      document.getElementById('rec-icon').className = 'ti ti-player-stop';
+      document.getElementById('rec-icon').style.color = '#d23f3f';
+    } catch (err) {
+      alert('Microphone access denied or not available.');
+    }
+  });
+
+  document.getElementById('entry-text').addEventListener('input', e => draft.text = e.target.value);
+  document.getElementById('place-name').addEventListener('input', e => draft.placeName = e.target.value);
+
+  document.getElementById('save-btn').addEventListener('click', () => {
+    if (!draft.text && !draft.photo && !draft.audio && !draft.gps && !draft.placeName) {
+      alert('Add something before saving.');
+      return;
+    }
+    entries.push({
+      id: 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      ts: Date.now(),
+      text: draft.text,
+      placeName: draft.placeName,
+      gps: draft.gps,
+      photo: draft.photo,
+      audio: draft.audio
+    });
+    persist();
+    resetDraft();
+    show('feed');
+  });
+
+  renderFeed();
+})();
+</script>
+</body>
+</html>
