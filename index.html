@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Travel Log">
-<meta name="theme-color" content="#fafaf7">
+<meta name="theme-color" content="#f5f0e6">
 <title>Travel Log</title>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -17,7 +17,7 @@
   html, body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-    background: #fafaf7;
+    background: #f5f0e6;
     color: #1c1c1e;
     height: 100%;
     overscroll-behavior: none;
@@ -30,12 +30,8 @@
     min-height: 100vh;
   }
   #screens { flex: 1; position: relative; overflow: hidden; }
-  .screen {
-    position: absolute; inset: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 12px 18px 90px;
-  }
+  .screen { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 18px 90px; }
+  .screen[data-screen="new"], .screen[data-screen="detail"] { background: #fafaf7; }
   .screen.hidden { display: none; }
   h1 { margin: 2px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
   .kicker { margin: 0; font-size: 11px; color: #8a8a8e; letter-spacing: 1.2px; font-weight: 500; }
@@ -58,9 +54,10 @@
   }
   .accent-btn:active { background: #a85629; }
   .card {
-    background: #fff; border: 0.5px solid #e4e4df;
+    background: #fff; border: 0.5px solid #e0d9c8;
     border-radius: 16px; padding: 14px;
     margin-bottom: 12px; cursor: pointer;
+    box-shadow: 0 1px 3px rgba(138, 117, 86, 0.06);
   }
   .card:active { background: #faf9f5; }
   .card-meta {
@@ -103,6 +100,50 @@
   }
   .gps-btn .ti { color: #c2693c; font-size: 18px; }
   .gps-btn .arrow { margin-left: auto; color: #b0b0b4; font-size: 12px; }
+
+  /* Unified Location block */
+  .location-block { margin-bottom: 10px; }
+  .location-label {
+    font-size: 10px; letter-spacing: 1.2px; color: #8a8a8e;
+    font-weight: 600; margin: 0 0 6px 4px;
+  }
+  .location-input-wrap {
+    display: flex; align-items: center;
+    background: #fff; border: 0.5px solid #d8d8d4;
+    border-radius: 12px; padding: 4px 4px 4px 12px;
+    transition: border-color 0.15s ease;
+  }
+  .location-input-wrap:focus-within { border-color: #c2693c; }
+  .location-input-wrap.has-gps { border-color: #c2693c; background: #fdf7f3; }
+  .location-icon { color: #c2693c; font-size: 18px; flex-shrink: 0; }
+  .location-input {
+    flex: 1; border: 0; background: transparent;
+    padding: 12px 8px; font-size: 14px;
+    font-family: inherit; color: #1c1c1e;
+    min-width: 0;
+  }
+  .location-input:focus { outline: none; }
+  .gps-toggle {
+    background: #f0eee8; border: 0;
+    color: #6b6b6e; width: 38px; height: 38px;
+    border-radius: 9px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .gps-toggle:active { background: #e4e2dc; }
+  .gps-toggle.active { background: #c2693c; color: #fff; }
+  .gps-toggle.loading { background: #e4e2dc; }
+  .gps-toggle.loading .ti { animation: spin 1s linear infinite; }
+  .gps-toggle .ti { font-size: 18px; }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  .location-status {
+    font-size: 11px; color: #8a8a8e;
+    margin: 6px 0 0 14px; min-height: 14px;
+    line-height: 1.4;
+  }
+  .location-status.success { color: #6b8e4a; }
+  .location-status.error { color: #b85050; }
   .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
   .media-btn {
     background: #fff; border: 0.5px solid #d8d8d4;
@@ -200,12 +241,25 @@
     cursor: pointer;
   }
 
+  /* Vintage paper texture, applied only to feed screen */
+  .paper-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .feed-content {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Tab bar */
   .tab-bar {
     position: fixed; bottom: 0; left: 0; right: 0;
     height: 64px;
-    background: rgba(250,250,247,0.94);
-    border-top: 0.5px solid #d8d8d4;
+    background: rgba(245,240,230,0.94);
+    border-top: 0.5px solid #d8d2c2;
     display: flex; align-items: center; justify-content: space-around;
     padding-bottom: env(safe-area-inset-bottom);
     backdrop-filter: blur(12px);
@@ -239,18 +293,53 @@
 
   <!-- FEED -->
   <div class="screen" data-screen="feed">
-    <div class="header">
-      <div>
-        <p class="kicker">JOURNAL</p>
-        <h1 id="feed-title">Your entries</h1>
+    <svg class="paper-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 400 800" aria-hidden="true">
+      <defs>
+        <pattern id="paper-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.55" fill="#c2a880"/>
+        </pattern>
+      </defs>
+      <rect width="400" height="800" fill="url(#paper-dots)"/>
+      <!-- compass rose, top right -->
+      <g transform="translate(330, 70)" stroke="#8a7556" stroke-width="0.6" fill="none" opacity="0.32">
+        <circle r="34"/>
+        <circle r="22"/>
+        <circle r="10"/>
+        <line x1="0" y1="-34" x2="0" y2="34"/>
+        <line x1="-34" y1="0" x2="34" y2="0"/>
+        <line x1="-24" y1="-24" x2="24" y2="24" stroke-dasharray="2,2"/>
+        <line x1="-24" y1="24" x2="24" y2="-24" stroke-dasharray="2,2"/>
+        <text x="0" y="-38" text-anchor="middle" font-family="serif" font-size="9" font-style="italic" fill="#8a7556" stroke="none">N</text>
+      </g>
+      <!-- subtle dashed travel path -->
+      <g opacity="0.18" stroke="#8a7556" stroke-width="0.7" fill="none" stroke-dasharray="3,4">
+        <path d="M 30 200 Q 100 240, 180 220 Q 260 200, 330 250"/>
+        <path d="M 40 520 Q 130 560, 220 540 Q 300 525, 360 570"/>
+      </g>
+      <!-- a few tiny dot markers along paths -->
+      <g fill="#8a7556" opacity="0.35">
+        <circle cx="30" cy="200" r="1.6"/>
+        <circle cx="180" cy="220" r="1.6"/>
+        <circle cx="330" cy="250" r="1.6"/>
+        <circle cx="40" cy="520" r="1.6"/>
+        <circle cx="220" cy="540" r="1.6"/>
+        <circle cx="360" cy="570" r="1.6"/>
+      </g>
+    </svg>
+    <div class="feed-content">
+      <div class="header">
+        <div>
+          <p class="kicker">JOURNAL</p>
+          <h1 id="feed-title">Your entries</h1>
+        </div>
+        <button class="pill-btn" data-go="map"><i class="ti ti-map-2"></i> Map</button>
       </div>
-      <button class="pill-btn" data-go="map"><i class="ti ti-map-2"></i> Map</button>
-    </div>
-    <div id="entries-list"></div>
-    <div id="empty-state" class="empty">
-      <i class="ti ti-notebook"></i>
-      <p>No entries yet</p>
-      <p class="hint">Tap + to write your first one.</p>
+      <div id="entries-list"></div>
+      <div id="empty-state" class="empty">
+        <i class="ti ti-notebook"></i>
+        <p>No entries yet</p>
+        <p class="hint">Tap + to write your first one.</p>
+      </div>
     </div>
   </div>
 
@@ -262,13 +351,17 @@
       <button class="accent-btn" id="save-btn">Save</button>
     </div>
 
-    <button class="form-row gps-btn" id="gps-btn">
-      <i class="ti ti-map-pin"></i>
-      <span id="gps-text">Tag this location</span>
-      <span class="arrow">Use GPS ›</span>
-    </button>
-
-    <input id="place-name" class="form-row" placeholder="Place name (optional)" />
+    <div class="location-block">
+      <div class="location-label">LOCATION</div>
+      <div class="location-input-wrap">
+        <i class="ti ti-map-pin location-icon"></i>
+        <input id="place-name" class="location-input" placeholder="Where are you?" autocomplete="off" />
+        <button class="gps-toggle" id="gps-btn" type="button" aria-label="Use GPS">
+          <i class="ti ti-current-location" id="gps-icon"></i>
+        </button>
+      </div>
+      <div id="gps-status" class="location-status"></div>
+    </div>
 
     <textarea id="entry-text" class="form-row" placeholder="What's it like? What are you feeling?"></textarea>
 
@@ -411,8 +504,14 @@
     const e = entries.find(x => x.id === id);
     if (!e) return;
     const c = document.getElementById('detail-content');
-    const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(4)+', '+e.gps.lng.toFixed(4) : '');
-    const locHtml = locText ? '<div class="detail-loc"><i class="ti ti-map-pin"></i><span>'+escapeHtml(locText)+'</span></div>' : '';
+    let locHtml = '';
+    if (e.placeName && e.gps) {
+      locHtml = '<div class="detail-loc"><i class="ti ti-map-pin"></i><span><strong>'+escapeHtml(e.placeName)+'</strong><br><span style="font-weight:400; color:#8a8a8e; font-size:12px;">'+e.gps.lat.toFixed(4)+', '+e.gps.lng.toFixed(4)+'</span></span></div>';
+    } else if (e.placeName) {
+      locHtml = '<div class="detail-loc"><i class="ti ti-map-pin"></i><span>'+escapeHtml(e.placeName)+'</span></div>';
+    } else if (e.gps) {
+      locHtml = '<div class="detail-loc"><i class="ti ti-map-pin"></i><span>'+e.gps.lat.toFixed(4)+', '+e.gps.lng.toFixed(4)+'</span></div>';
+    }
     const photoHtml = e.photo ? '<div class="detail-photo"><img src="'+e.photo+'"/></div>' : '';
     const textHtml = e.text ? '<p class="detail-text">'+escapeHtml(e.text)+'</p>' : '';
     const audioHtml = e.audio ? '<audio controls src="'+e.audio+'" class="detail-audio"></audio>' : '';
@@ -491,7 +590,12 @@
     draft = { text: '', placeName: '', gps: null, photo: null, audio: null };
     document.getElementById('entry-text').value = '';
     document.getElementById('place-name').value = '';
-    document.getElementById('gps-text').textContent = 'Tag this location';
+    document.getElementById('gps-status').textContent = '';
+    document.getElementById('gps-status').className = 'location-status';
+    document.querySelector('.location-input-wrap').classList.remove('has-gps');
+    const gpsBtn = document.getElementById('gps-btn');
+    gpsBtn.classList.remove('active', 'loading');
+    document.getElementById('gps-icon').className = 'ti ti-current-location';
     const pp = document.getElementById('photo-preview');
     pp.style.display = 'none'; pp.innerHTML = '';
     const ap = document.getElementById('audio-preview');
@@ -506,19 +610,52 @@
   document.querySelector('[data-new]').addEventListener('click', () => { resetDraft(); show('new'); });
 
   document.getElementById('gps-btn').addEventListener('click', () => {
-    const t = document.getElementById('gps-text');
-    t.textContent = 'Getting location…';
-    if (!navigator.geolocation) { t.textContent = 'GPS not available on this device'; return; }
+    const status = document.getElementById('gps-status');
+    const wrap = document.querySelector('.location-input-wrap');
+    const btn = document.getElementById('gps-btn');
+    const icon = document.getElementById('gps-icon');
+
+    // Toggle off if GPS already set
+    if (draft.gps) {
+      draft.gps = null;
+      btn.classList.remove('active');
+      wrap.classList.remove('has-gps');
+      icon.className = 'ti ti-current-location';
+      status.textContent = '';
+      status.className = 'location-status';
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      status.textContent = 'GPS not available on this device';
+      status.className = 'location-status error';
+      return;
+    }
+
+    btn.classList.add('loading');
+    icon.className = 'ti ti-loader-2';
+    status.textContent = 'Getting your location…';
+    status.className = 'location-status';
+
     navigator.geolocation.getCurrentPosition(
       pos => {
         draft.gps = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        t.textContent = draft.gps.lat.toFixed(4) + ', ' + draft.gps.lng.toFixed(4);
+        btn.classList.remove('loading');
+        btn.classList.add('active');
+        wrap.classList.add('has-gps');
+        icon.className = 'ti ti-check';
+        status.textContent = '📍 ' + draft.gps.lat.toFixed(4) + ', ' + draft.gps.lng.toFixed(4) + ' · tap to remove';
+        status.className = 'location-status success';
       },
       err => {
-        if (err.code === 1) t.textContent = 'Location permission denied';
-        else if (err.code === 2) t.textContent = 'Location unavailable';
-        else if (err.code === 3) t.textContent = 'Location timed out — try again';
-        else t.textContent = 'Could not get location';
+        btn.classList.remove('loading');
+        icon.className = 'ti ti-current-location';
+        let msg = 'Could not get location';
+        if (err.code === 1) msg = 'Location permission denied. Enable in Settings → Privacy → Location.';
+        else if (err.code === 2) msg = 'Location unavailable. Try again outside or with better signal.';
+        else if (err.code === 3) msg = 'Location timed out — try again.';
+        status.textContent = msg;
+        status.className = 'location-status error';
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
