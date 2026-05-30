@@ -285,6 +285,195 @@
 
   audio { height: 36px; }
   input[type=file] { display: none; }
+
+  /* Journal/Bundles segmented toggle */
+  .segment-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.6);
+    border: 0.5px solid #d8d2c2;
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 14px;
+    width: fit-content;
+  }
+  .segment-btn {
+    background: transparent; border: 0;
+    padding: 6px 14px; font-size: 13px;
+    font-family: inherit; cursor: pointer;
+    color: #6b6b6e; border-radius: 7px;
+    font-weight: 500;
+  }
+  .segment-btn.active {
+    background: #fff;
+    color: #c2693c;
+    box-shadow: 0 1px 3px rgba(138, 117, 86, 0.1);
+  }
+
+  /* Selection mode */
+  .feed-actions {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .select-btn {
+    background: transparent; border: 0.5px solid #d8d2c2;
+    color: #6b6b6e; padding: 6px 12px;
+    border-radius: 8px; font-size: 12px;
+    cursor: pointer; font-family: inherit;
+  }
+  .select-btn.active { background: #c2693c; color: #fff; border-color: #c2693c; }
+  .selection-bar {
+    display: none; align-items: center;
+    gap: 10px; padding: 10px 12px;
+    background: #fdf7f3; border: 0.5px solid #c2693c;
+    border-radius: 10px; margin-bottom: 12px;
+  }
+  .selection-bar.visible { display: flex; }
+  .selection-count {
+    font-size: 13px; color: #c2693c;
+    font-weight: 500;
+  }
+  .selection-bar .accent-btn {
+    margin-left: auto; padding: 6px 12px; font-size: 12px;
+  }
+  .card.selectable { padding-left: 44px; position: relative; }
+  .card.selectable::before {
+    content: '';
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    width: 20px; height: 20px;
+    border: 1.5px solid #c8c0b0;
+    border-radius: 50%;
+    background: #fff;
+    transition: all 0.15s ease;
+  }
+  .card.selectable.selected::before {
+    background: #c2693c; border-color: #c2693c;
+  }
+  .card.selectable.selected::after {
+    content: '✓';
+    position: absolute; left: 19px; top: 50%;
+    transform: translateY(-50%);
+    color: #fff; font-size: 12px; font-weight: bold;
+  }
+
+  /* Bundle cards */
+  .bundle-card {
+    background: #fff; border: 0.5px solid #e0d9c8;
+    border-radius: 16px; padding: 14px;
+    margin-bottom: 12px; cursor: pointer;
+    box-shadow: 0 1px 3px rgba(138, 117, 86, 0.06);
+    display: flex; gap: 12px; align-items: center;
+  }
+  .bundle-card:active { background: #faf9f5; }
+  .bundle-thumb {
+    width: 52px; height: 52px;
+    background: #f5f0e6;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: #c2693c;
+    font-size: 22px;
+  }
+  .bundle-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; border-radius: 10px;
+  }
+  .bundle-info { flex: 1; min-width: 0; }
+  .bundle-name {
+    font-size: 15px; font-weight: 600;
+    margin: 0 0 3px; color: #1c1c1e;
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bundle-meta {
+    font-size: 12px; color: #8a8a8e;
+    margin: 0;
+  }
+  .bundle-arrow {
+    color: #b0b0b4; font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* Bundle detail view */
+  .bundle-detail-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 18px; padding-top: 4px;
+  }
+  .bundle-detail-title {
+    margin: 0; font-size: 22px; font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+  .bundle-detail-meta {
+    font-size: 13px; color: #8a8a8e;
+    margin: 4px 0 18px;
+  }
+  .export-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin: 18px 0;
+  }
+  .export-btn {
+    background: #fff; border: 0.5px solid #d8d2c2;
+    padding: 16px 10px; border-radius: 12px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    font-size: 12px; cursor: pointer;
+    font-family: inherit; color: #1c1c1e;
+  }
+  .export-btn:active { background: #faf9f5; }
+  .export-btn .ti { font-size: 22px; color: #c2693c; }
+  .export-btn-label { font-weight: 500; }
+  .export-btn-sub { color: #8a8a8e; font-size: 10px; }
+
+  /* Loading overlay for exports */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(245,240,230,0.92);
+    backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; flex-direction: column; gap: 14px;
+  }
+  .overlay.visible { display: flex; }
+  .overlay .ti { font-size: 38px; color: #c2693c; animation: spin 1s linear infinite; }
+  .overlay-text { font-size: 14px; color: #6b6b6e; }
+
+  /* Modal for naming bundle */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(28,28,30,0.4);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; padding: 20px;
+  }
+  .modal-backdrop.visible { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px;
+    padding: 20px; width: 100%; max-width: 320px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  .modal h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; }
+  .modal p { margin: 0 0 14px; font-size: 13px; color: #6b6b6e; line-height: 1.4; }
+  .modal input {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 14px; border: 0.5px solid #d8d2c2;
+    border-radius: 10px; font-size: 14px;
+    font-family: inherit; margin-bottom: 14px;
+  }
+  .modal input:focus { outline: none; border-color: #c2693c; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-btn {
+    padding: 8px 14px; border-radius: 8px;
+    border: 0; font-size: 13px;
+    font-family: inherit; cursor: pointer;
+    font-weight: 500;
+  }
+  .modal-btn.cancel { background: transparent; color: #6b6b6e; }
+  .modal-btn.confirm { background: #c2693c; color: #fff; }
+
+  .empty-bundles {
+    text-align: center; padding: 60px 24px; color: #8a8a8e;
+  }
+  .empty-bundles .ti { font-size: 44px; color: #c8c8c0; }
+  .empty-bundles p { margin: 14px 0 4px; font-size: 15px; color: #4a4a4e; }
+  .empty-bundles .hint { font-size: 13px; color: #8a8a8e; }
 </style>
 </head>
 <body>
@@ -334,11 +523,37 @@
         </div>
         <button class="pill-btn" data-go="map"><i class="ti ti-map-2"></i> Map</button>
       </div>
-      <div id="entries-list"></div>
-      <div id="empty-state" class="empty">
-        <i class="ti ti-notebook"></i>
-        <p>No entries yet</p>
-        <p class="hint">Tap + to write your first one.</p>
+
+      <div class="segment-toggle">
+        <button class="segment-btn active" data-segment="entries">Entries</button>
+        <button class="segment-btn" data-segment="bundles">Bundles</button>
+      </div>
+
+      <!-- Entries view -->
+      <div id="entries-view">
+        <div class="feed-actions">
+          <button class="select-btn" id="select-btn">Select</button>
+        </div>
+        <div class="selection-bar" id="selection-bar">
+          <span class="selection-count" id="selection-count">0 selected</span>
+          <button class="accent-btn" id="create-bundle-btn">Create bundle</button>
+        </div>
+        <div id="entries-list"></div>
+        <div id="empty-state" class="empty">
+          <i class="ti ti-notebook"></i>
+          <p>No entries yet</p>
+          <p class="hint">Tap + to write your first one.</p>
+        </div>
+      </div>
+
+      <!-- Bundles view -->
+      <div id="bundles-view" style="display:none;">
+        <div id="bundles-list"></div>
+        <div id="empty-bundles" class="empty-bundles">
+          <i class="ti ti-folder"></i>
+          <p>No bundles yet</p>
+          <p class="hint">Tap "Select" on Entries to gather some into a bundle.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -372,7 +587,7 @@
       <label class="media-btn">
         <i class="ti ti-camera"></i>
         <span>Add photo</span>
-        <input type="file" id="photo-input" accept="image/*" capture="environment" />
+        <input type="file" id="photo-input" accept="image/*" />
       </label>
       <button class="media-btn" id="record-btn">
         <i class="ti ti-microphone" id="rec-icon"></i>
@@ -406,6 +621,50 @@
     </div>
   </div>
 
+  <!-- BUNDLE DETAIL -->
+  <div class="screen hidden" data-screen="bundle" style="background:#fafaf7;">
+    <div class="bundle-detail-header">
+      <button class="icon-btn" data-go="feed"><i class="ti ti-arrow-left" style="font-size:22px;"></i></button>
+      <button class="icon-btn" id="delete-bundle-btn"><i class="ti ti-trash" style="font-size:20px;"></i></button>
+    </div>
+    <h2 class="bundle-detail-title" id="bundle-detail-title">Bundle</h2>
+    <p class="bundle-detail-meta" id="bundle-detail-meta">0 entries</p>
+
+    <div class="export-grid">
+      <button class="export-btn" id="export-pdf-btn">
+        <i class="ti ti-file-text"></i>
+        <span class="export-btn-label">Export as PDF</span>
+        <span class="export-btn-sub">Multi-page journal</span>
+      </button>
+      <button class="export-btn" id="export-image-btn">
+        <i class="ti ti-photo"></i>
+        <span class="export-btn-label">Export as image</span>
+        <span class="export-btn-sub">Single shareable card</span>
+      </button>
+    </div>
+
+    <div id="bundle-entries-list"></div>
+  </div>
+
+</div>
+
+<!-- Naming modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <h3>Name this bundle</h3>
+    <p id="modal-subtitle">Give it something memorable.</p>
+    <input id="modal-input" placeholder="e.g. Lisbon weekend" autocomplete="off" />
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-btn confirm" id="modal-confirm">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export loading overlay -->
+<div class="overlay" id="overlay">
+  <i class="ti ti-loader-2"></i>
+  <p class="overlay-text" id="overlay-text">Preparing your export…</p>
 </div>
 
 <div class="tab-bar">
@@ -417,27 +676,44 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
   crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 (function(){
   const STORAGE_KEY = 'travel_log_entries_v1';
+  const BUNDLES_KEY = 'travel_log_bundles_v1';
   let entries = [];
+  let bundles = [];
   let draft = { text: '', placeName: '', gps: null, photo: null, audio: null };
   let mediaRecorder = null;
   let recordedChunks = [];
   let isRecording = false;
   let leafletMap = null;
   let markersLayer = null;
+  let currentSegment = 'entries';
+  let selectionMode = false;
+  let selectedIds = new Set();
+  let currentBundleId = null;
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) entries = JSON.parse(raw);
   } catch(e) { entries = []; }
 
+  try {
+    const raw = localStorage.getItem(BUNDLES_KEY);
+    if (raw) bundles = JSON.parse(raw);
+  } catch(e) { bundles = []; }
+
   function persist() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      localStorage.setItem(BUNDLES_KEY, JSON.stringify(bundles));
+    }
     catch(e) { alert('Storage limit reached. Older entries may need to be removed.'); }
     renderFeed();
+    renderBundles();
     if (leafletMap) renderMapPins();
   }
 
@@ -446,9 +722,10 @@
       s.classList.toggle('hidden', s.dataset.screen !== name);
     });
     document.querySelectorAll('[data-tab]').forEach(t => {
-      t.classList.toggle('active', t.dataset.tab === name);
+      t.classList.toggle('active', t.dataset.tab === (name === 'bundle' ? 'feed' : name));
     });
     if (name === 'map') initOrUpdateMap();
+    if (name === 'feed' && selectionMode) exitSelectionMode();
   }
 
   function fmtDate(ts) {
@@ -474,15 +751,23 @@
     if (entries.length === 0) {
       empty.style.display = 'block';
       title.textContent = 'Your entries';
+      document.getElementById('select-btn').style.display = 'none';
       return;
     }
     empty.style.display = 'none';
     title.textContent = entries.length + (entries.length === 1 ? ' entry' : ' entries');
+    document.getElementById('select-btn').style.display = '';
     const sorted = [...entries].sort((a,b) => b.ts - a.ts);
     sorted.forEach(e => {
       const card = document.createElement('div');
       card.className = 'card';
-      card.addEventListener('click', () => openDetail(e.id));
+      if (selectionMode) {
+        card.classList.add('selectable');
+        if (selectedIds.has(e.id)) card.classList.add('selected');
+        card.addEventListener('click', () => toggleSelection(e.id));
+      } else {
+        card.addEventListener('click', () => openDetail(e.id));
+      }
       const tags = [];
       if (e.photo) tags.push('photo');
       if (e.audio) tags.push('audio');
@@ -498,6 +783,316 @@
       card.innerHTML = metaHtml + photoHtml + textHtml + audioOnlyHtml + tagsHtml;
       list.appendChild(card);
     });
+  }
+
+  function renderBundles() {
+    const list = document.getElementById('bundles-list');
+    const empty = document.getElementById('empty-bundles');
+    list.innerHTML = '';
+    if (bundles.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    const sorted = [...bundles].sort((a,b) => b.ts - a.ts);
+    sorted.forEach(b => {
+      const card = document.createElement('div');
+      card.className = 'bundle-card';
+      card.addEventListener('click', () => openBundle(b.id));
+      const firstEntryWithPhoto = b.entryIds.map(id => entries.find(e => e.id === id)).find(e => e && e.photo);
+      const thumb = firstEntryWithPhoto
+        ? '<div class="bundle-thumb"><img src="'+firstEntryWithPhoto.photo+'"/></div>'
+        : '<div class="bundle-thumb"><i class="ti ti-folder-open"></i></div>';
+      const validCount = b.entryIds.filter(id => entries.find(e => e.id === id)).length;
+      card.innerHTML = thumb +
+        '<div class="bundle-info">' +
+          '<p class="bundle-name">'+escapeHtml(b.name)+'</p>' +
+          '<p class="bundle-meta">'+validCount+(validCount===1?' entry · ':' entries · ')+fmtDate(b.ts)+'</p>' +
+        '</div>' +
+        '<i class="ti ti-chevron-right bundle-arrow"></i>';
+      list.appendChild(card);
+    });
+  }
+
+  function toggleSelection(id) {
+    if (selectedIds.has(id)) selectedIds.delete(id);
+    else selectedIds.add(id);
+    document.getElementById('selection-count').textContent = selectedIds.size + ' selected';
+    document.getElementById('create-bundle-btn').disabled = selectedIds.size === 0;
+    document.getElementById('create-bundle-btn').style.opacity = selectedIds.size === 0 ? '0.5' : '1';
+    renderFeed();
+  }
+
+  function enterSelectionMode() {
+    selectionMode = true;
+    selectedIds.clear();
+    document.getElementById('select-btn').textContent = 'Cancel';
+    document.getElementById('select-btn').classList.add('active');
+    document.getElementById('selection-bar').classList.add('visible');
+    document.getElementById('selection-count').textContent = '0 selected';
+    document.getElementById('create-bundle-btn').disabled = true;
+    document.getElementById('create-bundle-btn').style.opacity = '0.5';
+    renderFeed();
+  }
+
+  function exitSelectionMode() {
+    selectionMode = false;
+    selectedIds.clear();
+    document.getElementById('select-btn').textContent = 'Select';
+    document.getElementById('select-btn').classList.remove('active');
+    document.getElementById('selection-bar').classList.remove('visible');
+    renderFeed();
+  }
+
+  function openBundle(id) {
+    currentBundleId = id;
+    const bundle = bundles.find(b => b.id === id);
+    if (!bundle) return;
+    document.getElementById('bundle-detail-title').textContent = bundle.name;
+    const validEntries = bundle.entryIds
+      .map(eid => entries.find(e => e.id === eid))
+      .filter(Boolean)
+      .sort((a,b) => a.ts - b.ts);
+    document.getElementById('bundle-detail-meta').textContent =
+      validEntries.length + (validEntries.length === 1 ? ' entry' : ' entries');
+    const list = document.getElementById('bundle-entries-list');
+    list.innerHTML = '';
+    validEntries.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.addEventListener('click', () => openDetail(e.id));
+      const tags = [];
+      if (e.photo) tags.push('photo');
+      if (e.audio) tags.push('audio');
+      if (e.text) tags.push('written');
+      const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
+      const metaHtml = locText
+        ? '<div class="card-meta"><i class="ti ti-map-pin"></i><span>'+escapeHtml(locText)+'</span><span class="spacer">'+fmtDate(e.ts)+'</span></div>'
+        : '<div class="card-meta"><span class="spacer">'+fmtDate(e.ts)+'</span></div>';
+      const photoHtml = e.photo ? '<img src="'+e.photo+'"/>' : '';
+      const textHtml = e.text ? '<p>'+escapeHtml(e.text)+'</p>' : '';
+      const tagsHtml = tags.length ? '<div class="tag-row">' + tags.map(t => '<span class="tag">'+t+'</span>').join('') + '</div>' : '';
+      card.innerHTML = metaHtml + photoHtml + textHtml + tagsHtml;
+      list.appendChild(card);
+    });
+    document.getElementById('delete-bundle-btn').onclick = () => {
+      if (!confirm('Delete this bundle? Your entries will not be deleted.')) return;
+      bundles = bundles.filter(b => b.id !== id);
+      persist();
+      show('feed');
+    };
+    show('bundle');
+  }
+
+  function switchSegment(name) {
+    currentSegment = name;
+    document.querySelectorAll('.segment-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.segment === name);
+    });
+    document.getElementById('entries-view').style.display = name === 'entries' ? 'block' : 'none';
+    document.getElementById('bundles-view').style.display = name === 'bundles' ? 'block' : 'none';
+    if (selectionMode && name === 'bundles') exitSelectionMode();
+  }
+
+  // Modal helpers
+  function openModal(title, subtitle, placeholder, onConfirm) {
+    document.querySelector('.modal h3').textContent = title;
+    document.getElementById('modal-subtitle').textContent = subtitle;
+    document.getElementById('modal-input').value = '';
+    document.getElementById('modal-input').placeholder = placeholder;
+    document.getElementById('modal-backdrop').classList.add('visible');
+    setTimeout(() => document.getElementById('modal-input').focus(), 100);
+    document.getElementById('modal-confirm').onclick = () => {
+      const val = document.getElementById('modal-input').value.trim();
+      if (!val) return;
+      closeModal();
+      onConfirm(val);
+    };
+  }
+  function closeModal() {
+    document.getElementById('modal-backdrop').classList.remove('visible');
+  }
+
+  function showOverlay(text) {
+    document.getElementById('overlay-text').textContent = text;
+    document.getElementById('overlay').classList.add('visible');
+  }
+  function hideOverlay() {
+    document.getElementById('overlay').classList.remove('visible');
+  }
+
+  // ----- Exports -----
+  async function exportBundleAsPDF(bundle) {
+    showOverlay('Building your PDF…');
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageW = 210, pageH = 297;
+      const margin = 18;
+      const maxW = pageW - margin * 2;
+      let y = margin;
+
+      const validEntries = bundle.entryIds
+        .map(eid => entries.find(e => e.id === eid))
+        .filter(Boolean)
+        .sort((a,b) => a.ts - b.ts);
+
+      // Cover
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(138, 117, 86);
+      doc.text('TRAVEL LOG', margin, y + 4);
+      y += 14;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(26);
+      doc.setTextColor(28, 28, 30);
+      const nameLines = doc.splitTextToSize(bundle.name, maxW);
+      doc.text(nameLines, margin, y);
+      y += nameLines.length * 10 + 4;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(138, 138, 142);
+      doc.text(validEntries.length + (validEntries.length === 1 ? ' entry' : ' entries'), margin, y);
+      y += 14;
+
+      for (let i = 0; i < validEntries.length; i++) {
+        const e = validEntries[i];
+
+        // Estimate space needed; new page if not enough
+        if (y > pageH - 60) { doc.addPage(); y = margin; }
+
+        // separator
+        doc.setDrawColor(224, 217, 200);
+        doc.setLineWidth(0.2);
+        doc.line(margin, y, pageW - margin, y);
+        y += 8;
+
+        // location + date line
+        const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(194, 105, 60);
+        if (locText) doc.text(locText, margin, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(138, 138, 142);
+        doc.setFontSize(10);
+        const dateStr = new Date(e.ts).toLocaleString();
+        const dateW = doc.getTextWidth(dateStr);
+        doc.text(dateStr, pageW - margin - dateW, y);
+        y += 7;
+
+        // photo
+        if (e.photo) {
+          try {
+            const imgProps = doc.getImageProperties(e.photo);
+            const ratio = imgProps.height / imgProps.width;
+            let imgW = Math.min(maxW, 120);
+            let imgH = imgW * ratio;
+            if (imgH > 100) { imgH = 100; imgW = imgH / ratio; }
+            if (y + imgH > pageH - margin) { doc.addPage(); y = margin; }
+            doc.addImage(e.photo, 'JPEG', margin, y, imgW, imgH);
+            y += imgH + 4;
+          } catch(err) { /* skip bad image */ }
+        }
+
+        // text
+        if (e.text) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          doc.setTextColor(40, 40, 42);
+          const textLines = doc.splitTextToSize(e.text, maxW);
+          textLines.forEach(line => {
+            if (y > pageH - margin) { doc.addPage(); y = margin; }
+            doc.text(line, margin, y);
+            y += 5.5;
+          });
+        }
+
+        if (e.audio) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(9);
+          doc.setTextColor(138, 138, 142);
+          if (y > pageH - margin) { doc.addPage(); y = margin; }
+          doc.text('[audio note attached to this entry]', margin, y);
+          y += 5;
+        }
+
+        y += 8;
+      }
+
+      const filename = bundle.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.pdf';
+      const blob = doc.output('blob');
+      await shareOrDownload(blob, filename, 'application/pdf', bundle.name);
+    } catch(err) {
+      console.error(err);
+      alert('Could not generate PDF. ' + (err.message || ''));
+    } finally {
+      hideOverlay();
+    }
+  }
+
+  async function exportBundleAsImage(bundle) {
+    showOverlay('Building your image…');
+    try {
+      const validEntries = bundle.entryIds
+        .map(eid => entries.find(e => e.id === eid))
+        .filter(Boolean)
+        .sort((a,b) => a.ts - b.ts);
+
+      // Build offscreen DOM
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed; left:-9999px; top:0; width:540px; background:#f5f0e6; padding:32px; font-family:-apple-system,BlinkMacSystemFont,sans-serif; box-sizing:border-box;';
+      let html = '<div style="margin-bottom:24px;">' +
+        '<div style="font-size:11px; color:#8a7556; letter-spacing:2px; margin-bottom:6px;">TRAVEL LOG</div>' +
+        '<div style="font-size:30px; font-weight:700; color:#1c1c1e; letter-spacing:-0.5px;">'+escapeHtml(bundle.name)+'</div>' +
+        '<div style="font-size:13px; color:#8a8a8e; margin-top:4px;">'+validEntries.length+(validEntries.length===1?' entry':' entries')+'</div>' +
+        '</div>';
+      validEntries.forEach(e => {
+        const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
+        html += '<div style="background:#fff; border:0.5px solid #e0d9c8; border-radius:14px; padding:16px; margin-bottom:14px;">';
+        if (locText) html += '<div style="font-size:12px; color:#c2693c; font-weight:600; margin-bottom:6px;">📍 '+escapeHtml(locText)+'</div>';
+        html += '<div style="font-size:11px; color:#8a8a8e; margin-bottom:10px;">'+new Date(e.ts).toLocaleString()+'</div>';
+        if (e.photo) html += '<img src="'+e.photo+'" style="width:100%; border-radius:10px; margin-bottom:10px; display:block;"/>';
+        if (e.text) html += '<div style="font-size:14px; line-height:1.55; color:#2c2c2e;">'+escapeHtml(e.text)+'</div>';
+        if (e.audio) html += '<div style="font-size:11px; color:#8a8a8e; font-style:italic; margin-top:8px;">[audio note attached]</div>';
+        html += '</div>';
+      });
+      wrap.innerHTML = html;
+      document.body.appendChild(wrap);
+
+      // wait a tick for images to be in DOM
+      await new Promise(r => setTimeout(r, 100));
+
+      const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: '#f5f0e6', useCORS: true, logging: false });
+      document.body.removeChild(wrap);
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
+      const filename = bundle.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.jpg';
+      await shareOrDownload(blob, filename, 'image/jpeg', bundle.name);
+    } catch(err) {
+      console.error(err);
+      alert('Could not generate image. ' + (err.message || ''));
+    } finally {
+      hideOverlay();
+    }
+  }
+
+  async function shareOrDownload(blob, filename, mime, title) {
+    const file = new File([blob], filename, { type: mime });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: title });
+        return;
+      } catch(err) {
+        // User cancelled or share failed — fall through to download
+        if (err.name === 'AbortError') return;
+      }
+    }
+    // Fallback: trigger download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function openDetail(id) {
@@ -608,6 +1203,53 @@
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.go)));
   document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.tab)));
   document.querySelector('[data-new]').addEventListener('click', () => { resetDraft(); show('new'); });
+
+  // Segment toggle
+  document.querySelectorAll('.segment-btn').forEach(b => {
+    b.addEventListener('click', e => switchSegment(e.currentTarget.dataset.segment));
+  });
+
+  // Selection mode
+  document.getElementById('select-btn').addEventListener('click', () => {
+    if (selectionMode) exitSelectionMode();
+    else enterSelectionMode();
+  });
+
+  document.getElementById('create-bundle-btn').addEventListener('click', () => {
+    if (selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
+    openModal('Name this bundle', ids.length + (ids.length === 1 ? ' entry selected.' : ' entries selected.'),
+      'e.g. Lisbon weekend', (name) => {
+        bundles.push({
+          id: 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+          ts: Date.now(),
+          name: name,
+          entryIds: ids
+        });
+        persist();
+        exitSelectionMode();
+        switchSegment('bundles');
+      });
+  });
+
+  // Modal
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-backdrop').addEventListener('click', e => {
+    if (e.target.id === 'modal-backdrop') closeModal();
+  });
+  document.getElementById('modal-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('modal-confirm').click();
+  });
+
+  // Export buttons
+  document.getElementById('export-pdf-btn').addEventListener('click', () => {
+    const bundle = bundles.find(b => b.id === currentBundleId);
+    if (bundle) exportBundleAsPDF(bundle);
+  });
+  document.getElementById('export-image-btn').addEventListener('click', () => {
+    const bundle = bundles.find(b => b.id === currentBundleId);
+    if (bundle) exportBundleAsImage(bundle);
+  });
 
   document.getElementById('gps-btn').addEventListener('click', () => {
     const status = document.getElementById('gps-status');
@@ -743,6 +1385,7 @@
   });
 
   renderFeed();
+  renderBundles();
 })();
 </script>
 </body>
