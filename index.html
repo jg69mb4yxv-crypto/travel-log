@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Travel Log">
-<meta name="theme-color" content="#f5f0e6">
+<meta name="theme-color" content="#475A8A">
 <title>Travel Log</title>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -17,7 +17,7 @@
   html, body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-    background: #f5f0e6;
+    background: #475A8A;
     color: #1c1c1e;
     height: 100%;
     overscroll-behavior: none;
@@ -31,16 +31,19 @@
   }
   #screens { flex: 1; position: relative; overflow: hidden; }
   .screen { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 18px 90px; }
-  .screen[data-screen="new"], .screen[data-screen="detail"] { background: #fafaf7; }
+  .screen[data-screen="new"], .screen[data-screen="detail"] { background: #FFFFFF; }
   .screen.hidden { display: none; }
   h1 { margin: 2px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
   .kicker { margin: 0; font-size: 11px; color: #8a8a8e; letter-spacing: 1.2px; font-weight: 500; }
+  /* Feed text colors flipped for dark background */
+  .feed-content h1 { color: #FDE68A; }
+  .feed-content .kicker { color: rgba(253,230,138,0.65); }
   .header {
     display: flex; justify-content: space-between; align-items: flex-end;
     margin-bottom: 18px; padding-top: 8px;
   }
   .pill-btn {
-    background: #fff; border: 0.5px solid #d8d8d4;
+    background: #fff; border: 0.5px solid #E5E7EB;
     color: #1c1c1e; border-radius: 10px;
     padding: 8px 12px; font-size: 13px;
     cursor: pointer; font-family: inherit;
@@ -48,23 +51,23 @@
   }
   .pill-btn:active { background: #f0f0ec; }
   .accent-btn {
-    background: #c2693c; color: #fff; border: 0;
+    background: #1F2937; color: #fff; border: 0;
     border-radius: 10px; padding: 8px 14px; font-size: 13px;
     font-weight: 500; cursor: pointer; font-family: inherit;
   }
-  .accent-btn:active { background: #a85629; }
+  .accent-btn:active { background: #0f1620; }
   .card {
-    background: #fff; border: 0.5px solid #e0d9c8;
+    background: #fff; border: 0;
     border-radius: 16px; padding: 14px;
     margin-bottom: 12px; cursor: pointer;
-    box-shadow: 0 1px 3px rgba(138, 117, 86, 0.06);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.18);
   }
-  .card:active { background: #faf9f5; }
+  .card:active { background: #FEFCE8; }
   .card-meta {
     display: flex; align-items: center; gap: 6px;
     font-size: 12px; color: #8a8a8e; margin-bottom: 8px;
   }
-  .card-meta .ti { font-size: 14px; color: #c2693c; }
+  .card-meta .ti { font-size: 14px; color: #1F2937; }
   .card-meta .spacer { margin-left: auto; }
   .card img { width: 100%; display: block; border-radius: 10px; margin-bottom: 10px; max-height: 240px; object-fit: cover; }
   .card p { margin: 0; font-size: 14px; line-height: 1.55; color: #2c2c2e; }
@@ -78,6 +81,10 @@
   .empty .ti { font-size: 44px; color: #c8c8c0; }
   .empty p { margin: 14px 0 4px; font-size: 15px; color: #4a4a4e; }
   .empty .hint { font-size: 13px; color: #8a8a8e; }
+  /* Empty state inside feed (dark bg) needs lighter text */
+  .feed-content .empty p, .feed-content .empty-bundles p { color: rgba(255,255,255,0.85); }
+  .feed-content .empty .hint, .feed-content .empty-bundles .hint { color: rgba(255,255,255,0.55); }
+  .feed-content .empty .ti, .feed-content .empty-bundles .ti { color: rgba(253,230,138,0.45); }
 
   .new-header {
     display: flex; justify-content: space-between; align-items: center;
@@ -87,18 +94,18 @@
   .icon-btn { background: transparent; border: 0; color: #8a8a8e; cursor: pointer; padding: 4px; }
   .form-row {
     width: 100%; background: #fff;
-    border: 0.5px solid #d8d8d4; color: #1c1c1e;
+    border: 0.5px solid #E5E7EB; color: #1c1c1e;
     padding: 12px 14px; border-radius: 12px;
     font-size: 14px; font-family: inherit;
     margin-bottom: 10px;
   }
-  .form-row:focus { outline: none; border-color: #c2693c; }
+  .form-row:focus { outline: none; border-color: #1F2937; }
   textarea.form-row { min-height: 130px; resize: none; line-height: 1.6; }
   .gps-btn {
     display: flex; align-items: center; gap: 10px;
     cursor: pointer; font-size: 14px;
   }
-  .gps-btn .ti { color: #c2693c; font-size: 18px; }
+  .gps-btn .ti { color: #1F2937; font-size: 18px; }
   .gps-btn .arrow { margin-left: auto; color: #b0b0b4; font-size: 12px; }
 
   /* Unified Location block */
@@ -109,13 +116,13 @@
   }
   .location-input-wrap {
     display: flex; align-items: center;
-    background: #fff; border: 0.5px solid #d8d8d4;
+    background: #fff; border: 0.5px solid #E5E7EB;
     border-radius: 12px; padding: 4px 4px 4px 12px;
     transition: border-color 0.15s ease;
   }
-  .location-input-wrap:focus-within { border-color: #c2693c; }
-  .location-input-wrap.has-gps { border-color: #c2693c; background: #fdf7f3; }
-  .location-icon { color: #c2693c; font-size: 18px; flex-shrink: 0; }
+  .location-input-wrap:focus-within { border-color: #1F2937; }
+  .location-input-wrap.has-gps { border-color: #1F2937; background: #FEF9E7; }
+  .location-icon { color: #1F2937; font-size: 18px; flex-shrink: 0; }
   .location-input {
     flex: 1; border: 0; background: transparent;
     padding: 12px 8px; font-size: 14px;
@@ -132,7 +139,7 @@
     transition: all 0.15s ease;
   }
   .gps-toggle:active { background: #e4e2dc; }
-  .gps-toggle.active { background: #c2693c; color: #fff; }
+  .gps-toggle.active { background: #1F2937; color: #fff; }
   .gps-toggle.loading { background: #e4e2dc; }
   .gps-toggle.loading .ti { animation: spin 1s linear infinite; }
   .gps-toggle .ti { font-size: 18px; }
@@ -146,18 +153,18 @@
   .location-status.error { color: #b85050; }
   .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
   .media-btn {
-    background: #fff; border: 0.5px solid #d8d8d4;
+    background: #fff; border: 0.5px solid #E5E7EB;
     color: #1c1c1e; padding: 18px 10px; border-radius: 12px;
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     font-size: 12px; cursor: pointer; font-family: inherit;
   }
   .media-btn:active { background: #f0f0ec; }
-  .media-btn .ti { font-size: 20px; color: #c2693c; }
+  .media-btn .ti { font-size: 20px; color: #1F2937; }
   .preview { margin-top: 10px; border-radius: 12px; overflow: hidden; }
   .preview img { width: 100%; display: block; }
   .audio-preview {
     margin-top: 10px; padding: 12px;
-    background: #fff; border: 0.5px solid #d8d8d4;
+    background: #fff; border: 0.5px solid #E5E7EB;
     border-radius: 12px;
   }
   .audio-preview audio { width: 100%; }
@@ -166,7 +173,7 @@
   .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-top: 4px; }
   .detail-loc {
     display: flex; align-items: center; gap: 8px;
-    font-size: 13px; color: #c2693c; margin-bottom: 14px; font-weight: 500;
+    font-size: 13px; color: #1F2937; margin-bottom: 14px; font-weight: 500;
   }
   .detail-photo { margin-bottom: 16px; border-radius: 14px; overflow: hidden; }
   .detail-photo img { width: 100%; display: block; }
@@ -188,7 +195,7 @@
   }
   .map-top-bar > * { pointer-events: auto; }
   .map-chip {
-    background: rgba(255,255,255,0.95); border: 0.5px solid #d8d8d4;
+    background: rgba(255,255,255,0.95); border: 0.5px solid #E5E7EB;
     color: #1c1c1e; border-radius: 10px; padding: 8px 12px;
     font-size: 13px; backdrop-filter: blur(8px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -199,7 +206,7 @@
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     color: #8a8a8e; pointer-events: none; z-index: 999;
-    background: rgba(250,250,247,0.92);
+    background: rgba(255,255,255,0.92);
   }
   .map-empty .ti { font-size: 44px; color: #c8c8c0; }
   .map-empty p { margin: 14px 0 4px; font-size: 14px; color: #4a4a4e; }
@@ -208,10 +215,117 @@
   /* Custom Leaflet marker */
   .custom-pin {
     width: 22px; height: 22px;
-    background: #c2693c;
+    background: #1F2937;
     border: 3px solid #fff;
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .trail-dot {
+    width: 10px; height: 10px;
+    background: #FDE68A;
+    border: 2px solid #1F2937;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .trail-dot.auto {
+    width: 8px; height: 8px;
+    background: rgba(253, 230, 138, 0.55);
+    border: 1.5px solid rgba(31, 41, 55, 0.7);
+  }
+
+  /* Map screen: check-in floating button */
+  .checkin-btn {
+    position: absolute;
+    left: 50%; bottom: 80px;
+    transform: translateX(-50%);
+    background: #1F2937; color: #FDE68A;
+    border: 0; border-radius: 24px;
+    padding: 12px 20px; font-size: 14px;
+    font-weight: 500; font-family: inherit;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 1000;
+  }
+  .checkin-btn:active { background: #0f1620; transform: translateX(-50%) scale(0.97); }
+  .checkin-btn .ti { font-size: 18px; }
+  .checkin-btn.loading .ti { animation: spin 1s linear infinite; }
+  .checkin-toast {
+    position: absolute;
+    left: 50%; bottom: 140px;
+    transform: translateX(-50%);
+    background: rgba(31,41,55,0.92);
+    color: #FDE68A;
+    padding: 8px 14px; font-size: 13px;
+    border-radius: 8px;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .checkin-toast.visible { opacity: 1; }
+
+  /* Settings icon button (in feed header) */
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-pill-btn {
+    background: #fff; border: 0;
+    color: #1F2937; border-radius: 10px;
+    width: 36px; height: 36px;
+    cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .icon-pill-btn:active { background: #f0f0ec; }
+  .icon-pill-btn .ti { font-size: 18px; }
+
+  /* Settings screen */
+  .settings-section {
+    background: #fff; border-radius: 14px;
+    padding: 4px 0;
+    margin-bottom: 16px;
+    border: 0.5px solid #E5E7EB;
+  }
+  .settings-section h3 {
+    margin: 0; padding: 12px 16px 4px;
+    font-size: 11px; color: #8a8a8e;
+    letter-spacing: 1.2px; font-weight: 600;
+    text-transform: uppercase;
+  }
+  .settings-row {
+    display: flex; align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    border-top: 0.5px solid #f3f3ee;
+  }
+  .settings-row:first-of-type { border-top: 0; }
+  .settings-row-info { flex: 1; min-width: 0; }
+  .settings-row-title {
+    font-size: 14px; margin: 0; color: #1c1c1e;
+    font-weight: 500;
+  }
+  .settings-row-desc {
+    font-size: 12px; color: #6b6b6e;
+    margin: 3px 0 0; line-height: 1.4;
+  }
+  /* Toggle switch */
+  .toggle {
+    position: relative; width: 44px; height: 26px;
+    background: #d4d4cd; border-radius: 13px;
+    cursor: pointer; transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: ''; position: absolute;
+    top: 2px; left: 2px;
+    width: 22px; height: 22px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle.on { background: #1F2937; }
+  .toggle.on::after { transform: translateX(18px); }
+  .settings-warning {
+    font-size: 11px; color: #b85050;
+    margin: 6px 0 0; line-height: 1.4;
   }
   .leaflet-popup-content-wrapper {
     border-radius: 12px;
@@ -225,7 +339,7 @@
     max-width: 220px;
   }
   .popup-place {
-    font-weight: 600; color: #c2693c;
+    font-weight: 600; color: #1F2937;
     margin: 0 0 4px; font-size: 12px;
   }
   .popup-text {
@@ -236,18 +350,18 @@
     overflow: hidden;
   }
   .popup-link {
-    color: #c2693c; font-size: 12px;
+    color: #1F2937; font-size: 12px;
     text-decoration: none; font-weight: 500;
     cursor: pointer;
   }
 
-  /* Vintage paper texture, applied only to feed screen */
+  /* Polaroid wall texture, applied only to feed screen */
   .paper-bg {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 1;
   }
   .feed-content {
     position: relative;
@@ -258,8 +372,8 @@
   .tab-bar {
     position: fixed; bottom: 0; left: 0; right: 0;
     height: 64px;
-    background: rgba(245,240,230,0.94);
-    border-top: 0.5px solid #d8d2c2;
+    background: rgba(255,255,255,0.94);
+    border-top: 0.5px solid #E5E7EB;
     display: flex; align-items: center; justify-content: space-around;
     padding-bottom: env(safe-area-inset-bottom);
     backdrop-filter: blur(12px);
@@ -272,15 +386,15 @@
     cursor: pointer; font-family: inherit; padding: 4px 12px;
   }
   .tab .ti { font-size: 22px; }
-  .tab.active { color: #c2693c; }
+  .tab.active { color: #1F2937; }
   .tab-new {
-    background: #c2693c; border: 0;
+    background: #1F2937; border: 0;
     width: 52px; height: 52px; border-radius: 50%;
     color: #fff; display: flex; align-items: center; justify-content: center;
     cursor: pointer; margin-top: -22px;
-    box-shadow: 0 4px 14px rgba(194,105,60,0.35);
+    box-shadow: 0 4px 14px rgba(31,41,55,0.35);
   }
-  .tab-new:active { background: #a85629; }
+  .tab-new:active { background: #0f1620; }
   .tab-new .ti { font-size: 24px; }
 
   audio { height: 36px; }
@@ -289,8 +403,8 @@
   /* Journal/Bundles segmented toggle */
   .segment-toggle {
     display: flex;
-    background: rgba(255,255,255,0.6);
-    border: 0.5px solid #d8d2c2;
+    background: rgba(255,255,255,0.12);
+    border: 0.5px solid rgba(255,255,255,0.15);
     border-radius: 10px;
     padding: 3px;
     margin-bottom: 14px;
@@ -300,13 +414,13 @@
     background: transparent; border: 0;
     padding: 6px 14px; font-size: 13px;
     font-family: inherit; cursor: pointer;
-    color: #6b6b6e; border-radius: 7px;
+    color: rgba(255,255,255,0.7); border-radius: 7px;
     font-weight: 500;
   }
   .segment-btn.active {
     background: #fff;
-    color: #c2693c;
-    box-shadow: 0 1px 3px rgba(138, 117, 86, 0.1);
+    color: #1F2937;
+    box-shadow: 0 1px 3px rgba(31, 41, 55, 0.1);
   }
 
   /* Selection mode */
@@ -315,21 +429,21 @@
     margin-bottom: 12px; flex-wrap: wrap;
   }
   .select-btn {
-    background: transparent; border: 0.5px solid #d8d2c2;
-    color: #6b6b6e; padding: 6px 12px;
+    background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85); padding: 6px 12px;
     border-radius: 8px; font-size: 12px;
     cursor: pointer; font-family: inherit;
   }
-  .select-btn.active { background: #c2693c; color: #fff; border-color: #c2693c; }
+  .select-btn.active { background: #FDE68A; color: #1F2937; border-color: #FDE68A; }
   .selection-bar {
     display: none; align-items: center;
     gap: 10px; padding: 10px 12px;
-    background: #fdf7f3; border: 0.5px solid #c2693c;
+    background: #FEF9E7; border: 0.5px solid #1F2937;
     border-radius: 10px; margin-bottom: 12px;
   }
   .selection-bar.visible { display: flex; }
   .selection-count {
-    font-size: 13px; color: #c2693c;
+    font-size: 13px; color: #1F2937;
     font-weight: 500;
   }
   .selection-bar .accent-btn {
@@ -347,7 +461,7 @@
     transition: all 0.15s ease;
   }
   .card.selectable.selected::before {
-    background: #c2693c; border-color: #c2693c;
+    background: #1F2937; border-color: #1F2937;
   }
   .card.selectable.selected::after {
     content: '✓';
@@ -358,20 +472,20 @@
 
   /* Bundle cards */
   .bundle-card {
-    background: #fff; border: 0.5px solid #e0d9c8;
+    background: #fff; border: 0;
     border-radius: 16px; padding: 14px;
     margin-bottom: 12px; cursor: pointer;
-    box-shadow: 0 1px 3px rgba(138, 117, 86, 0.06);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.18);
     display: flex; gap: 12px; align-items: center;
   }
-  .bundle-card:active { background: #faf9f5; }
+  .bundle-card:active { background: #FEFCE8; }
   .bundle-thumb {
     width: 52px; height: 52px;
-    background: #f5f0e6;
+    background: #FFFFFF;
     border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    color: #c2693c;
+    color: #1F2937;
     font-size: 22px;
   }
   .bundle-thumb img {
@@ -412,28 +526,28 @@
     gap: 10px; margin: 18px 0;
   }
   .export-btn {
-    background: #fff; border: 0.5px solid #d8d2c2;
+    background: #fff; border: 0.5px solid #E5E7EB;
     padding: 16px 10px; border-radius: 12px;
     display: flex; flex-direction: column;
     align-items: center; gap: 6px;
     font-size: 12px; cursor: pointer;
     font-family: inherit; color: #1c1c1e;
   }
-  .export-btn:active { background: #faf9f5; }
-  .export-btn .ti { font-size: 22px; color: #c2693c; }
+  .export-btn:active { background: #FEFCE8; }
+  .export-btn .ti { font-size: 22px; color: #1F2937; }
   .export-btn-label { font-weight: 500; }
   .export-btn-sub { color: #8a8a8e; font-size: 10px; }
 
   /* Loading overlay for exports */
   .overlay {
     position: fixed; inset: 0;
-    background: rgba(245,240,230,0.92);
+    background: rgba(255,255,255,0.92);
     backdrop-filter: blur(4px);
     display: none; align-items: center; justify-content: center;
     z-index: 2000; flex-direction: column; gap: 14px;
   }
   .overlay.visible { display: flex; }
-  .overlay .ti { font-size: 38px; color: #c2693c; animation: spin 1s linear infinite; }
+  .overlay .ti { font-size: 38px; color: #1F2937; animation: spin 1s linear infinite; }
   .overlay-text { font-size: 14px; color: #6b6b6e; }
 
   /* Modal for naming bundle */
@@ -453,11 +567,11 @@
   .modal p { margin: 0 0 14px; font-size: 13px; color: #6b6b6e; line-height: 1.4; }
   .modal input {
     width: 100%; box-sizing: border-box;
-    padding: 12px 14px; border: 0.5px solid #d8d2c2;
+    padding: 12px 14px; border: 0.5px solid #E5E7EB;
     border-radius: 10px; font-size: 14px;
     font-family: inherit; margin-bottom: 14px;
   }
-  .modal input:focus { outline: none; border-color: #c2693c; }
+  .modal input:focus { outline: none; border-color: #1F2937; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
   .modal-btn {
     padding: 8px 14px; border-radius: 8px;
@@ -466,7 +580,7 @@
     font-weight: 500;
   }
   .modal-btn.cancel { background: transparent; color: #6b6b6e; }
-  .modal-btn.confirm { background: #c2693c; color: #fff; }
+  .modal-btn.confirm { background: #1F2937; color: #fff; }
 
   .empty-bundles {
     text-align: center; padding: 60px 24px; color: #8a8a8e;
@@ -483,36 +597,90 @@
   <!-- FEED -->
   <div class="screen" data-screen="feed">
     <svg class="paper-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 400 800" aria-hidden="true">
-      <defs>
-        <pattern id="paper-dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="11" cy="11" r="0.55" fill="#c2a880"/>
-        </pattern>
-      </defs>
-      <rect width="400" height="800" fill="url(#paper-dots)"/>
-      <!-- compass rose, top right -->
-      <g transform="translate(330, 70)" stroke="#8a7556" stroke-width="0.6" fill="none" opacity="0.32">
-        <circle r="34"/>
-        <circle r="22"/>
-        <circle r="10"/>
-        <line x1="0" y1="-34" x2="0" y2="34"/>
-        <line x1="-34" y1="0" x2="34" y2="0"/>
-        <line x1="-24" y1="-24" x2="24" y2="24" stroke-dasharray="2,2"/>
-        <line x1="-24" y1="24" x2="24" y2="-24" stroke-dasharray="2,2"/>
-        <text x="0" y="-38" text-anchor="middle" font-family="serif" font-size="9" font-style="italic" fill="#8a7556" stroke="none">N</text>
+      <!-- Scattered background stars (small, dim) -->
+      <g fill="#F8FAFC">
+        <circle cx="55" cy="80" r="1.0" opacity="0.55"/>
+        <circle cx="130" cy="55" r="0.7" opacity="0.4"/>
+        <circle cx="210" cy="70" r="1.2" opacity="0.7"/>
+        <circle cx="285" cy="40" r="0.8" opacity="0.5"/>
+        <circle cx="350" cy="85" r="1.0" opacity="0.55"/>
+        <circle cx="40" cy="170" r="1.4" opacity="0.75"/>
+        <circle cx="105" cy="140" r="0.7" opacity="0.4"/>
+        <circle cx="180" cy="180" r="1.1" opacity="0.6"/>
+        <circle cx="250" cy="155" r="0.8" opacity="0.5"/>
+        <circle cx="325" cy="195" r="1.3" opacity="0.7"/>
+        <circle cx="370" cy="160" r="0.7" opacity="0.4"/>
+        <circle cx="60" cy="260" r="1.0" opacity="0.55"/>
+        <circle cx="145" cy="285" r="1.5" opacity="0.8"/>
+        <circle cx="220" cy="260" r="0.8" opacity="0.5"/>
+        <circle cx="295" cy="295" r="1.2" opacity="0.65"/>
+        <circle cx="360" cy="265" r="0.7" opacity="0.4"/>
+        <circle cx="35" cy="370" r="0.9" opacity="0.5"/>
+        <circle cx="115" cy="395" r="1.3" opacity="0.7"/>
+        <circle cx="195" cy="370" r="0.7" opacity="0.4"/>
+        <circle cx="275" cy="405" r="1.0" opacity="0.55"/>
+        <circle cx="345" cy="380" r="1.4" opacity="0.75"/>
+        <circle cx="55" cy="490" r="1.1" opacity="0.6"/>
+        <circle cx="135" cy="475" r="0.8" opacity="0.45"/>
+        <circle cx="215" cy="510" r="1.5" opacity="0.8"/>
+        <circle cx="290" cy="485" r="0.7" opacity="0.4"/>
+        <circle cx="365" cy="515" r="1.0" opacity="0.55"/>
+        <circle cx="45" cy="590" r="1.2" opacity="0.65"/>
+        <circle cx="125" cy="615" r="0.7" opacity="0.4"/>
+        <circle cx="200" cy="595" r="1.0" opacity="0.55"/>
+        <circle cx="280" cy="625" r="1.4" opacity="0.75"/>
+        <circle cx="355" cy="600" r="0.8" opacity="0.5"/>
+        <circle cx="70" cy="705" r="1.0" opacity="0.55"/>
+        <circle cx="150" cy="730" r="0.7" opacity="0.4"/>
+        <circle cx="225" cy="700" r="1.3" opacity="0.7"/>
+        <circle cx="305" cy="735" r="0.9" opacity="0.5"/>
+        <circle cx="370" cy="710" r="1.1" opacity="0.6"/>
       </g>
-      <!-- subtle dashed travel path -->
-      <g opacity="0.18" stroke="#8a7556" stroke-width="0.7" fill="none" stroke-dasharray="3,4">
-        <path d="M 30 200 Q 100 240, 180 220 Q 260 200, 330 250"/>
-        <path d="M 40 520 Q 130 560, 220 540 Q 300 525, 360 570"/>
+
+      <!-- Constellation 1: top — like a trip's first stops -->
+      <g stroke="#FDE68A" stroke-width="0.7" fill="none" opacity="0.55">
+        <path d="M 60 110 L 130 145 L 210 125 L 285 165 L 350 130"/>
       </g>
-      <!-- a few tiny dot markers along paths -->
-      <g fill="#8a7556" opacity="0.35">
-        <circle cx="30" cy="200" r="1.6"/>
-        <circle cx="180" cy="220" r="1.6"/>
-        <circle cx="330" cy="250" r="1.6"/>
-        <circle cx="40" cy="520" r="1.6"/>
-        <circle cx="220" cy="540" r="1.6"/>
-        <circle cx="360" cy="570" r="1.6"/>
+      <g fill="#FDE68A" opacity="0.95">
+        <circle cx="60" cy="110" r="2.4"/>
+        <circle cx="130" cy="145" r="2.6"/>
+        <circle cx="210" cy="125" r="2.4"/>
+        <circle cx="285" cy="165" r="2.2"/>
+        <circle cx="350" cy="130" r="2.5"/>
+      </g>
+
+      <!-- Constellation 2: middle — a triangular cluster -->
+      <g stroke="#FDE68A" stroke-width="0.7" fill="none" opacity="0.55">
+        <path d="M 80 340 L 180 320 L 220 410 L 80 340 Z"/>
+        <path d="M 220 410 L 320 380"/>
+      </g>
+      <g fill="#FDE68A" opacity="0.95">
+        <circle cx="80" cy="340" r="2.5"/>
+        <circle cx="180" cy="320" r="2.8"/>
+        <circle cx="220" cy="410" r="2.4"/>
+        <circle cx="320" cy="380" r="2.6"/>
+      </g>
+
+      <!-- Constellation 3: lower — winding journey shape -->
+      <g stroke="#FDE68A" stroke-width="0.7" fill="none" opacity="0.55">
+        <path d="M 50 550 L 130 580 L 175 540 L 250 570 L 340 545"/>
+      </g>
+      <g fill="#FDE68A" opacity="0.95">
+        <circle cx="50" cy="550" r="2.3"/>
+        <circle cx="130" cy="580" r="2.5"/>
+        <circle cx="175" cy="540" r="2.2"/>
+        <circle cx="250" cy="570" r="2.7"/>
+        <circle cx="340" cy="545" r="2.4"/>
+      </g>
+
+      <!-- Constellation 4: bottom — small pair + connector -->
+      <g stroke="#FDE68A" stroke-width="0.7" fill="none" opacity="0.55">
+        <path d="M 100 680 L 200 720 L 290 690"/>
+      </g>
+      <g fill="#FDE68A" opacity="0.95">
+        <circle cx="100" cy="680" r="2.4"/>
+        <circle cx="200" cy="720" r="2.6"/>
+        <circle cx="290" cy="690" r="2.3"/>
       </g>
     </svg>
     <div class="feed-content">
@@ -521,7 +689,10 @@
           <p class="kicker">JOURNAL</p>
           <h1 id="feed-title">Your entries</h1>
         </div>
-        <button class="pill-btn" data-go="map"><i class="ti ti-map-2"></i> Map</button>
+        <div class="header-actions">
+          <button class="icon-pill-btn" data-go="settings" aria-label="Settings"><i class="ti ti-settings"></i></button>
+          <button class="pill-btn" data-go="map"><i class="ti ti-map-2"></i> Map</button>
+        </div>
       </div>
 
       <div class="segment-toggle">
@@ -614,15 +785,20 @@
       <button class="map-chip" data-go="feed"><i class="ti ti-arrow-left" style="font-size:13px; vertical-align:-2px;"></i> Back</button>
       <span class="map-chip" id="map-count" style="cursor: default;">0 pins</span>
     </div>
+    <button class="checkin-btn" id="checkin-btn">
+      <i class="ti ti-current-location"></i>
+      <span id="checkin-label">Check in here</span>
+    </button>
+    <div class="checkin-toast" id="checkin-toast"></div>
     <div id="map-empty" class="map-empty">
       <i class="ti ti-map-pin-off"></i>
       <p>No GPS-tagged entries yet</p>
-      <p class="hint">Tag a location when you create an entry.</p>
+      <p class="hint">Tag a location when you create an entry, or tap "Check in here" below.</p>
     </div>
   </div>
 
   <!-- BUNDLE DETAIL -->
-  <div class="screen hidden" data-screen="bundle" style="background:#fafaf7;">
+  <div class="screen hidden" data-screen="bundle" style="background:#FFFFFF;">
     <div class="bundle-detail-header">
       <button class="icon-btn" data-go="feed"><i class="ti ti-arrow-left" style="font-size:22px;"></i></button>
       <button class="icon-btn" id="delete-bundle-btn"><i class="ti ti-trash" style="font-size:20px;"></i></button>
@@ -644,6 +820,37 @@
     </div>
 
     <div id="bundle-entries-list"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen hidden" data-screen="settings" style="background:#FFFFFF;">
+    <div class="detail-header">
+      <button class="icon-btn" data-go="feed"><i class="ti ti-arrow-left" style="font-size:22px;"></i></button>
+    </div>
+    <h2 class="bundle-detail-title" style="margin-bottom:20px;">Settings</h2>
+
+    <div class="settings-section">
+      <h3>Location</h3>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <p class="settings-row-title">Auto-log on app open</p>
+          <p class="settings-row-desc">Drop a faint pin on the map each time you open the app. Builds your trail without thinking about it.</p>
+          <p class="settings-row-desc" id="autopin-note" style="display:none;">Your iPhone may ask for location permission the first time. Pins are stored only on this device.</p>
+        </div>
+        <div class="toggle" id="autopin-toggle"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Data</h3>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <p class="settings-row-title" id="pins-stat">0 trail points</p>
+          <p class="settings-row-desc">Trail points are check-ins and auto-logged pins. Entries with GPS also count.</p>
+        </div>
+        <button class="select-btn" id="clear-pins-btn" style="color:#b85050; border-color:#f3d3d3;">Clear pins</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -683,14 +890,23 @@
 (function(){
   const STORAGE_KEY = 'travel_log_entries_v1';
   const BUNDLES_KEY = 'travel_log_bundles_v1';
+  const PINS_KEY = 'travel_log_pins_v1';
+  const SETTINGS_KEY = 'travel_log_settings_v1';
+  const AUTOPIN_MIN_INTERVAL_MS = 30 * 60 * 1000; // 30 min — don't auto-log more than twice an hour
+  const TRAIL_GAP_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — break trail between trips
+
   let entries = [];
   let bundles = [];
+  let pins = [];
+  let settings = { autopinOnOpen: false };
   let draft = { text: '', placeName: '', gps: null, photo: null, audio: null };
   let mediaRecorder = null;
   let recordedChunks = [];
   let isRecording = false;
   let leafletMap = null;
   let markersLayer = null;
+  let pinsLayer = null;
+  let trailLayer = null;
   let currentSegment = 'entries';
   let selectionMode = false;
   let selectedIds = new Set();
@@ -706,10 +922,22 @@
     if (raw) bundles = JSON.parse(raw);
   } catch(e) { bundles = []; }
 
+  try {
+    const raw = localStorage.getItem(PINS_KEY);
+    if (raw) pins = JSON.parse(raw);
+  } catch(e) { pins = []; }
+
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) settings = Object.assign(settings, JSON.parse(raw));
+  } catch(e) {}
+
   function persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       localStorage.setItem(BUNDLES_KEY, JSON.stringify(bundles));
+      localStorage.setItem(PINS_KEY, JSON.stringify(pins));
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     }
     catch(e) { alert('Storage limit reached. Older entries may need to be removed.'); }
     renderFeed();
@@ -717,15 +945,41 @@
     if (leafletMap) renderMapPins();
   }
 
+  function addPin(lat, lng, source) {
+    pins.push({
+      id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      ts: Date.now(),
+      lat: lat,
+      lng: lng,
+      source: source || 'checkin'
+    });
+    persist();
+  }
+
+  function maybeAutoLogOnOpen() {
+    if (!settings.autopinOnOpen) return;
+    if (!navigator.geolocation) return;
+    const lastAuto = pins.filter(p => p.source === 'auto').sort((a,b) => b.ts - a.ts)[0];
+    if (lastAuto && (Date.now() - lastAuto.ts) < AUTOPIN_MIN_INTERVAL_MS) return;
+    // Silent attempt — if it fails (no permission, no signal), just skip
+    navigator.geolocation.getCurrentPosition(
+      pos => addPin(pos.coords.latitude, pos.coords.longitude, 'auto'),
+      () => {},
+      { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
+    );
+  }
+
   function show(name) {
     document.querySelectorAll('.screen').forEach(s => {
       s.classList.toggle('hidden', s.dataset.screen !== name);
     });
     document.querySelectorAll('[data-tab]').forEach(t => {
-      t.classList.toggle('active', t.dataset.tab === (name === 'bundle' ? 'feed' : name));
+      const activeTab = (name === 'bundle' || name === 'settings') ? 'feed' : name;
+      t.classList.toggle('active', t.dataset.tab === activeTab);
     });
     if (name === 'map') initOrUpdateMap();
     if (name === 'feed' && selectionMode) exitSelectionMode();
+    if (name === 'settings') renderSettings();
   }
 
   function fmtDate(ts) {
@@ -778,7 +1032,7 @@
         : '<div class="card-meta"><span class="spacer">'+fmtDate(e.ts)+'</span></div>';
       const photoHtml = e.photo ? '<img src="'+e.photo+'"/>' : '';
       const textHtml = e.text ? '<p>'+escapeHtml(e.text)+'</p>' : '';
-      const audioOnlyHtml = (e.audio && !e.text) ? '<div style="display:flex; align-items:center; gap:8px; padding:10px; background:#faf9f5; border-radius:10px;"><i class="ti ti-volume" style="font-size:16px; color:#c2693c;"></i><span style="font-size:13px; color:#6b6b6e;">Audio note</span></div>' : '';
+      const audioOnlyHtml = (e.audio && !e.text) ? '<div style="display:flex; align-items:center; gap:8px; padding:10px; background:#FEFCE8; border-radius:10px;"><i class="ti ti-volume" style="font-size:16px; color:#1F2937;"></i><span style="font-size:13px; color:#6b6b6e;">Audio note</span></div>' : '';
       const tagsHtml = tags.length ? '<div class="tag-row">' + tags.map(t => '<span class="tag">'+t+'</span>').join('') + '</div>' : '';
       card.innerHTML = metaHtml + photoHtml + textHtml + audioOnlyHtml + tagsHtml;
       list.appendChild(card);
@@ -940,7 +1194,7 @@
       // Cover
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
-      doc.setTextColor(138, 117, 86);
+      doc.setTextColor(31, 41, 55);
       doc.text('TRAVEL LOG', margin, y + 4);
       y += 14;
       doc.setFont('helvetica', 'bold');
@@ -962,7 +1216,7 @@
         if (y > pageH - 60) { doc.addPage(); y = margin; }
 
         // separator
-        doc.setDrawColor(224, 217, 200);
+        doc.setDrawColor(229, 231, 235);
         doc.setLineWidth(0.2);
         doc.line(margin, y, pageW - margin, y);
         y += 8;
@@ -971,7 +1225,7 @@
         const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
-        doc.setTextColor(194, 105, 60);
+        doc.setTextColor(31, 41, 55);
         if (locText) doc.text(locText, margin, y);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(138, 138, 142);
@@ -1041,16 +1295,16 @@
 
       // Build offscreen DOM
       const wrap = document.createElement('div');
-      wrap.style.cssText = 'position:fixed; left:-9999px; top:0; width:540px; background:#f5f0e6; padding:32px; font-family:-apple-system,BlinkMacSystemFont,sans-serif; box-sizing:border-box;';
+      wrap.style.cssText = 'position:fixed; left:-9999px; top:0; width:540px; background:#FFFFFF; padding:32px; font-family:-apple-system,BlinkMacSystemFont,sans-serif; box-sizing:border-box;';
       let html = '<div style="margin-bottom:24px;">' +
-        '<div style="font-size:11px; color:#8a7556; letter-spacing:2px; margin-bottom:6px;">TRAVEL LOG</div>' +
+        '<div style="font-size:11px; color:#9CA3AF; letter-spacing:2px; margin-bottom:6px;">TRAVEL LOG</div>' +
         '<div style="font-size:30px; font-weight:700; color:#1c1c1e; letter-spacing:-0.5px;">'+escapeHtml(bundle.name)+'</div>' +
         '<div style="font-size:13px; color:#8a8a8e; margin-top:4px;">'+validEntries.length+(validEntries.length===1?' entry':' entries')+'</div>' +
         '</div>';
       validEntries.forEach(e => {
         const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
-        html += '<div style="background:#fff; border:0.5px solid #e0d9c8; border-radius:14px; padding:16px; margin-bottom:14px;">';
-        if (locText) html += '<div style="font-size:12px; color:#c2693c; font-weight:600; margin-bottom:6px;">📍 '+escapeHtml(locText)+'</div>';
+        html += '<div style="background:#fff; border:0.5px solid #E5E7EB; border-radius:14px; padding:16px; margin-bottom:14px;">';
+        if (locText) html += '<div style="font-size:12px; color:#1F2937; font-weight:600; margin-bottom:6px;">📍 '+escapeHtml(locText)+'</div>';
         html += '<div style="font-size:11px; color:#8a8a8e; margin-bottom:10px;">'+new Date(e.ts).toLocaleString()+'</div>';
         if (e.photo) html += '<img src="'+e.photo+'" style="width:100%; border-radius:10px; margin-bottom:10px; display:block;"/>';
         if (e.text) html += '<div style="font-size:14px; line-height:1.55; color:#2c2c2e;">'+escapeHtml(e.text)+'</div>';
@@ -1063,7 +1317,7 @@
       // wait a tick for images to be in DOM
       await new Promise(r => setTimeout(r, 100));
 
-      const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: '#f5f0e6', useCORS: true, logging: false });
+      const canvas = await html2canvas(wrap, { scale: 2, backgroundColor: '#FFFFFF', useCORS: true, logging: false });
       document.body.removeChild(wrap);
       const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
       const filename = bundle.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.jpg';
@@ -1132,9 +1386,10 @@
         maxZoom: 19,
         attribution: '© OpenStreetMap'
       }).addTo(leafletMap);
-      markersLayer = L.layerGroup().addTo(leafletMap);
+      trailLayer = L.layerGroup().addTo(leafletMap);  // trail under everything
+      pinsLayer = L.layerGroup().addTo(leafletMap);   // small pins
+      markersLayer = L.layerGroup().addTo(leafletMap); // entry markers on top
     } else {
-      // re-trigger size calc in case the screen was hidden when we made the map
       setTimeout(() => leafletMap.invalidateSize(), 100);
     }
     renderMapPins();
@@ -1143,13 +1398,58 @@
   function renderMapPins() {
     if (!markersLayer) return;
     markersLayer.clearLayers();
-    const geo = entries.filter(e => e.gps);
-    const count = document.getElementById('map-count');
+    pinsLayer.clearLayers();
+    trailLayer.clearLayers();
+
+    const entryGeo = entries.filter(e => e.gps);
     const empty = document.getElementById('map-empty');
-    count.textContent = geo.length + (geo.length === 1 ? ' pin' : ' pins');
-    if (geo.length === 0) { empty.style.display = 'flex'; return; }
+    const count = document.getElementById('map-count');
+
+    // Build the unified trail points: entries with GPS + all pins
+    const trailPoints = [];
+    entryGeo.forEach(e => trailPoints.push({ ts: e.ts, lat: e.gps.lat, lng: e.gps.lng, source: 'entry', entryId: e.id }));
+    pins.forEach(p => trailPoints.push({ ts: p.ts, lat: p.lat, lng: p.lng, source: p.source, pinId: p.id }));
+    trailPoints.sort((a,b) => a.ts - b.ts);
+
+    const totalPoints = trailPoints.length;
+    count.textContent = totalPoints + (totalPoints === 1 ? ' point' : ' points');
+
+    if (totalPoints === 0) { empty.style.display = 'flex'; return; }
     empty.style.display = 'none';
 
+    // Draw trail: connect consecutive points if within TRAIL_GAP_MS
+    for (let i = 1; i < trailPoints.length; i++) {
+      const a = trailPoints[i-1], b = trailPoints[i];
+      if ((b.ts - a.ts) <= TRAIL_GAP_MS) {
+        L.polyline(
+          [[a.lat, a.lng], [b.lat, b.lng]],
+          { color: '#FDE68A', weight: 2.5, opacity: 0.75, dashArray: null }
+        ).addTo(trailLayer);
+      }
+    }
+
+    // Draw small check-in / auto pins
+    const smallIcon = L.divIcon({
+      className: '',
+      html: '<div class="trail-dot"></div>',
+      iconSize: [10, 10],
+      iconAnchor: [5, 5]
+    });
+    const autoIcon = L.divIcon({
+      className: '',
+      html: '<div class="trail-dot auto"></div>',
+      iconSize: [8, 8],
+      iconAnchor: [4, 4]
+    });
+    pins.forEach(p => {
+      const icon = p.source === 'auto' ? autoIcon : smallIcon;
+      const m = L.marker([p.lat, p.lng], { icon: icon }).addTo(pinsLayer);
+      const dt = new Date(p.ts).toLocaleString();
+      const label = p.source === 'auto' ? 'Auto-logged' : 'Check-in';
+      m.bindPopup('<p class="popup-place">'+label+'</p><p class="popup-text">'+dt+'</p>');
+    });
+
+    // Draw entry markers (larger, with popups)
     const customIcon = L.divIcon({
       className: '',
       html: '<div class="custom-pin"></div>',
@@ -1158,7 +1458,7 @@
     });
 
     const bounds = [];
-    geo.forEach(e => {
+    entryGeo.forEach(e => {
       const marker = L.marker([e.gps.lat, e.gps.lng], { icon: customIcon }).addTo(markersLayer);
       const place = e.placeName || (e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3));
       const snippet = e.text ? (e.text.length > 120 ? e.text.slice(0,120)+'…' : e.text) : (e.audio ? 'Audio note' : 'Tagged location');
@@ -1173,10 +1473,11 @@
       });
       bounds.push([e.gps.lat, e.gps.lng]);
     });
+    pins.forEach(p => bounds.push([p.lat, p.lng]));
 
     if (bounds.length === 1) {
       leafletMap.setView(bounds[0], 13);
-    } else {
+    } else if (bounds.length > 1) {
       leafletMap.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
     }
   }
@@ -1197,7 +1498,7 @@
     ap.style.display = 'none'; ap.innerHTML = '';
     document.getElementById('rec-label').textContent = 'Record audio';
     document.getElementById('rec-icon').className = 'ti ti-microphone';
-    document.getElementById('rec-icon').style.color = '#c2693c';
+    document.getElementById('rec-icon').style.color = '#1F2937';
   }
 
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.go)));
@@ -1350,7 +1651,7 @@
         isRecording = false;
         document.getElementById('rec-label').textContent = 'Re-record';
         document.getElementById('rec-icon').className = 'ti ti-microphone';
-        document.getElementById('rec-icon').style.color = '#c2693c';
+        document.getElementById('rec-icon').style.color = '#1F2937';
       };
       mediaRecorder.start();
       isRecording = true;
@@ -1384,8 +1685,65 @@
     show('feed');
   });
 
+  // ----- Check-in button -----
+  function showCheckinToast(text) {
+    const toast = document.getElementById('checkin-toast');
+    toast.textContent = text;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 2200);
+  }
+
+  document.getElementById('checkin-btn').addEventListener('click', () => {
+    if (!navigator.geolocation) { showCheckinToast('GPS not available'); return; }
+    const btn = document.getElementById('checkin-btn');
+    const label = document.getElementById('checkin-label');
+    btn.classList.add('loading');
+    label.textContent = 'Locating…';
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        addPin(pos.coords.latitude, pos.coords.longitude, 'checkin');
+        btn.classList.remove('loading');
+        label.textContent = 'Check in here';
+        showCheckinToast('✓ Checked in');
+      },
+      err => {
+        btn.classList.remove('loading');
+        label.textContent = 'Check in here';
+        if (err.code === 1) showCheckinToast('Location permission denied');
+        else showCheckinToast('Could not get location');
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  });
+
+  // ----- Settings: autopin toggle -----
+  function renderSettings() {
+    const toggle = document.getElementById('autopin-toggle');
+    toggle.classList.toggle('on', !!settings.autopinOnOpen);
+    document.getElementById('autopin-note').style.display = settings.autopinOnOpen ? 'block' : 'none';
+    document.getElementById('pins-stat').textContent =
+      (pins.length + entries.filter(e => e.gps).length) + ' trail points · ' +
+      pins.length + ' pin' + (pins.length === 1 ? '' : 's');
+  }
+
+  document.getElementById('autopin-toggle').addEventListener('click', () => {
+    settings.autopinOnOpen = !settings.autopinOnOpen;
+    persist();
+    renderSettings();
+  });
+
+  document.getElementById('clear-pins-btn').addEventListener('click', () => {
+    if (pins.length === 0) { alert('No pins to clear.'); return; }
+    if (!confirm('Clear all ' + pins.length + ' check-in and auto-logged pins? Journal entries with GPS will not be affected.')) return;
+    pins = [];
+    persist();
+    renderSettings();
+  });
+
   renderFeed();
   renderBundles();
+  // Auto-log on open if enabled (silent, fire-and-forget)
+  setTimeout(maybeAutoLogOnOpen, 1500);
 })();
 </script>
 </body>
