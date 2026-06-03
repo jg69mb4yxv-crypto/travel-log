@@ -400,6 +400,159 @@
   audio { height: 36px; }
   input[type=file] { display: none; }
 
+  /* Day section headers in the feed */
+  .day-header {
+    display: flex; align-items: center; gap: 10px;
+    margin: 20px 0 10px;
+  }
+  .day-header:first-child { margin-top: 4px; }
+  .day-header-label {
+    font-size: 12px; font-weight: 600;
+    color: #FDE68A; letter-spacing: 0.5px;
+    text-transform: none;
+    flex-shrink: 0;
+  }
+  .day-header-line {
+    flex: 1; height: 1px;
+    background: rgba(253, 230, 138, 0.25);
+  }
+
+  /* Day summary card */
+  .summary-card {
+    background: linear-gradient(180deg, #FFFCEB, #fff);
+    border-radius: 16px; padding: 14px;
+    margin-bottom: 12px; cursor: pointer;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.18);
+    border-left: 3px solid #FDE68A;
+  }
+  .summary-card:active { background: #FEFCE8; }
+  .summary-tagbar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+    font-size: 11px; color: #1F2937;
+    font-weight: 600; letter-spacing: 0.3px;
+  }
+  .summary-tagbar > .ti:first-child {
+    font-size: 14px; color: #1F2937;
+  }
+  .summary-tagbar > span:first-of-type {
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .summary-mood, .summary-weather {
+    margin-left: auto; font-size: 16px;
+  }
+  .summary-mood + .summary-weather { margin-left: 0; }
+  .summary-highlight {
+    margin: 0 0 8px; font-size: 15px;
+    font-weight: 500; color: #1c1c1e;
+    line-height: 1.4;
+  }
+  .summary-text {
+    margin: 0; font-size: 13px;
+    color: #4a4a4e; line-height: 1.55;
+  }
+  .audio-mini {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; background: rgba(253, 230, 138, 0.35);
+    border-radius: 8px; font-size: 12px; color: #6b6b6e;
+  }
+  .audio-mini .ti { font-size: 14px; color: #1F2937; }
+
+  /* Subtle nudge badge on + button */
+  .tab-new { position: relative; }
+  .tab-new.has-badge::after {
+    content: '';
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 10px; height: 10px;
+    background: #FDE68A;
+    border: 2px solid #1F2937;
+    border-radius: 50%;
+  }
+
+  /* Compose-type chooser modal */
+  .compose-chooser {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin: 18px 0 6px;
+  }
+  .chooser-btn {
+    background: #fff; border: 0.5px solid #E5E7EB;
+    padding: 18px 12px; border-radius: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+    font-size: 13px; cursor: pointer;
+    font-family: inherit; color: #1c1c1e;
+    text-align: center;
+  }
+  .chooser-btn:active { background: #FEFCE8; }
+  .chooser-btn .ti { font-size: 26px; color: #1F2937; }
+  .chooser-btn-sub { font-size: 11px; color: #6b6b6e; }
+
+  /* Summary editor specific */
+  .summary-context {
+    background: #FEFCE8;
+    border: 0.5px solid #FDE68A;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .summary-context-label {
+    font-size: 10px; color: #6b6b6e;
+    letter-spacing: 0.8px; font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .summary-context-text {
+    font-size: 12px; color: #2c2c2e;
+    margin: 0; line-height: 1.5;
+  }
+  .summary-context-photos {
+    display: flex; gap: 6px; margin-top: 8px;
+    overflow-x: auto;
+  }
+  .ctx-photo {
+    width: 50px; height: 50px;
+    border-radius: 8px; object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.15s ease;
+    flex-shrink: 0;
+  }
+  .ctx-photo.selected { border-color: #1F2937; }
+
+  .mood-row {
+    display: flex; gap: 8px; margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .mood-row-label {
+    font-size: 10px; color: #8a8a8e;
+    letter-spacing: 1px; font-weight: 600;
+    margin: 0 0 6px 4px;
+  }
+  .mood-chip {
+    background: #fff; border: 0.5px solid #E5E7EB;
+    padding: 8px 12px; border-radius: 20px;
+    font-size: 18px; cursor: pointer; font-family: inherit;
+    transition: all 0.15s ease;
+    line-height: 1;
+  }
+  .mood-chip.selected {
+    background: #1F2937; border-color: #1F2937;
+    transform: scale(1.05);
+  }
+  .summary-mode-toggle {
+    display: flex; gap: 8px; margin-bottom: 10px;
+  }
+  .mode-btn {
+    flex: 1; background: #fff;
+    border: 0.5px solid #E5E7EB;
+    padding: 10px; border-radius: 10px;
+    font-size: 13px; cursor: pointer;
+    font-family: inherit; color: #6b6b6e;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .mode-btn.active { background: #1F2937; color: #fff; border-color: #1F2937; }
+  .mode-btn .ti { font-size: 16px; }
+
   /* Journal/Bundles segmented toggle */
   .segment-toggle {
     display: flex;
@@ -848,8 +1001,86 @@
           <p class="settings-row-title" id="pins-stat">0 trail points</p>
           <p class="settings-row-desc">Trail points are check-ins and auto-logged pins. Entries with GPS also count.</p>
         </div>
-        <button class="select-btn" id="clear-pins-btn" style="color:#b85050; border-color:#f3d3d3;">Clear pins</button>
+        <button class="select-btn" id="clear-pins-btn" style="color:#b85050; border-colour:#f3d3d3;">Clear pins</button>
       </div>
+    </div>
+  </div>
+
+  <!-- COMPOSE CHOOSER -->
+  <div class="screen hidden" data-screen="compose" style="background:#FFFFFF;">
+    <div class="new-header">
+      <button class="icon-btn" data-go="feed"><i class="ti ti-x" style="font-size:22px;"></i></button>
+      <p>What are you adding?</p>
+      <span style="width:32px;"></span>
+    </div>
+    <div class="compose-chooser">
+      <button class="chooser-btn" id="choose-entry-btn">
+        <i class="ti ti-note"></i>
+        <span>Moment</span>
+        <span class="chooser-btn-sub">Photo, note, audio, location</span>
+      </button>
+      <button class="chooser-btn" id="choose-summary-btn">
+        <i class="ti ti-bookmark"></i>
+        <span>Day summary</span>
+        <span class="chooser-btn-sub">Wrap up your day</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- DAY SUMMARY EDITOR -->
+  <div class="screen hidden" data-screen="summary-edit" style="background:#FFFFFF;">
+    <div class="new-header">
+      <button class="icon-btn" data-go="feed"><i class="ti ti-x" style="font-size:22px;"></i></button>
+      <p id="summary-edit-title">Day summary</p>
+      <button class="accent-btn" id="save-summary-btn">Save</button>
+    </div>
+
+    <!-- Date selector -->
+    <input type="date" id="summary-date" class="form-row" />
+
+    <!-- Auto-pulled context -->
+    <div class="summary-context" id="summary-context" style="display:none;">
+      <p class="summary-context-label" id="summary-context-label">TODAY</p>
+      <p class="summary-context-text" id="summary-context-text"></p>
+      <div class="summary-context-photos" id="summary-context-photos"></div>
+    </div>
+
+    <!-- Mood + weather -->
+    <p class="mood-row-label">HOW WAS THE DAY?</p>
+    <div class="mood-row" id="mood-row">
+      <button class="mood-chip" data-mood="😄" title="Great">😄</button>
+      <button class="mood-chip" data-mood="🙂" title="Good">🙂</button>
+      <button class="mood-chip" data-mood="😐" title="OK">😐</button>
+      <button class="mood-chip" data-mood="😕" title="Rough">😕</button>
+      <button class="mood-chip" data-mood="😩" title="Bad">😩</button>
+    </div>
+
+    <p class="mood-row-label">WEATHER</p>
+    <div class="mood-row" id="weather-row">
+      <button class="mood-chip" data-weather="☀️" title="Sunny">☀️</button>
+      <button class="mood-chip" data-weather="⛅" title="Cloudy">⛅</button>
+      <button class="mood-chip" data-weather="🌧️" title="Rainy">🌧️</button>
+      <button class="mood-chip" data-weather="❄️" title="Snow">❄️</button>
+      <button class="mood-chip" data-weather="🌫️" title="Foggy">🌫️</button>
+      <button class="mood-chip" data-weather="🌪️" title="Stormy">🌪️</button>
+    </div>
+
+    <input id="summary-highlight" class="form-row" placeholder="Best thing today (one line)" />
+
+    <!-- Text vs voice mode -->
+    <div class="summary-mode-toggle">
+      <button class="mode-btn active" data-mode="text" id="mode-text-btn"><i class="ti ti-pencil"></i> Write</button>
+      <button class="mode-btn" data-mode="voice" id="mode-voice-btn"><i class="ti ti-microphone"></i> Speak</button>
+    </div>
+
+    <textarea id="summary-text" class="form-row" placeholder="What was today? (or tap the mic on your keyboard to dictate)"></textarea>
+
+    <div id="summary-record-area" style="display:none;">
+      <button class="media-btn" id="summary-record-btn" style="width:100%;">
+        <i class="ti ti-microphone" id="summary-rec-icon"></i>
+        <span id="summary-rec-label">Tap to record</span>
+      </button>
+      <div id="summary-audio-preview" class="audio-preview" style="display:none;"></div>
     </div>
   </div>
 
@@ -892,12 +1123,14 @@
   const BUNDLES_KEY = 'travel_log_bundles_v1';
   const PINS_KEY = 'travel_log_pins_v1';
   const SETTINGS_KEY = 'travel_log_settings_v1';
-  const AUTOPIN_MIN_INTERVAL_MS = 30 * 60 * 1000; // 30 min — don't auto-log more than twice an hour
-  const TRAIL_GAP_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — break trail between trips
+  const SUMMARIES_KEY = 'travel_log_summaries_v1';
+  const AUTOPIN_MIN_INTERVAL_MS = 30 * 60 * 1000;
+  const TRAIL_GAP_MS = 7 * 24 * 60 * 60 * 1000;
 
   let entries = [];
   let bundles = [];
   let pins = [];
+  let summaries = [];
   let settings = { autopinOnOpen: false };
   let draft = { text: '', placeName: '', gps: null, photo: null, audio: null };
   let mediaRecorder = null;
@@ -932,12 +1165,18 @@
     if (raw) settings = Object.assign(settings, JSON.parse(raw));
   } catch(e) {}
 
+  try {
+    const raw = localStorage.getItem(SUMMARIES_KEY);
+    if (raw) summaries = JSON.parse(raw);
+  } catch(e) { summaries = []; }
+
   function persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       localStorage.setItem(BUNDLES_KEY, JSON.stringify(bundles));
       localStorage.setItem(PINS_KEY, JSON.stringify(pins));
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      localStorage.setItem(SUMMARIES_KEY, JSON.stringify(summaries));
     }
     catch(e) { alert('Storage limit reached. Older entries may need to be removed.'); }
     renderFeed();
@@ -997,12 +1236,48 @@
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  // Returns 'YYYY-MM-DD' for a timestamp in local time
+  function dateKey(ts) {
+    const d = new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function todayKey() { return dateKey(Date.now()); }
+
+  // Friendly date label for a day section header
+  function fmtDayHeader(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    if (dt.getTime() === today.getTime()) return 'Today';
+    if (dt.getTime() === yesterday.getTime()) return 'Yesterday';
+    const sameYear = dt.getFullYear() === now.getFullYear();
+    return dt.toLocaleDateString([], sameYear ? { weekday: 'long', month: 'long', day: 'numeric' } : { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  function summaryForDay(key) {
+    return summaries.find(s => s.dateKey === key);
+  }
+
+  function entriesForDay(key) {
+    return entries.filter(e => dateKey(e.ts) === key).sort((a,b) => b.ts - a.ts);
+  }
+
   function renderFeed() {
     const list = document.getElementById('entries-list');
     const empty = document.getElementById('empty-state');
     const title = document.getElementById('feed-title');
     list.innerHTML = '';
-    if (entries.length === 0) {
+
+    // Update +-button badge if today has no summary yet and it's evening
+    updateSummaryBadge();
+
+    if (entries.length === 0 && summaries.length === 0) {
       empty.style.display = 'block';
       title.textContent = 'Your entries';
       document.getElementById('select-btn').style.display = 'none';
@@ -1010,33 +1285,78 @@
     }
     empty.style.display = 'none';
     title.textContent = entries.length + (entries.length === 1 ? ' entry' : ' entries');
-    document.getElementById('select-btn').style.display = '';
-    const sorted = [...entries].sort((a,b) => b.ts - a.ts);
-    sorted.forEach(e => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      if (selectionMode) {
-        card.classList.add('selectable');
-        if (selectedIds.has(e.id)) card.classList.add('selected');
-        card.addEventListener('click', () => toggleSelection(e.id));
-      } else {
-        card.addEventListener('click', () => openDetail(e.id));
+    document.getElementById('select-btn').style.display = entries.length > 0 ? '' : 'none';
+
+    // Gather all day keys that have either a summary or entries
+    const keys = new Set();
+    entries.forEach(e => keys.add(dateKey(e.ts)));
+    summaries.forEach(s => keys.add(s.dateKey));
+    const sortedKeys = Array.from(keys).sort((a, b) => b.localeCompare(a));
+
+    sortedKeys.forEach(key => {
+      // Day header
+      const header = document.createElement('div');
+      header.className = 'day-header';
+      header.innerHTML = '<span class="day-header-label">' + escapeHtml(fmtDayHeader(key)) + '</span><span class="day-header-line"></span>';
+      list.appendChild(header);
+
+      // Day summary card (if exists)
+      const sum = summaryForDay(key);
+      if (sum) {
+        const sCard = document.createElement('div');
+        sCard.className = 'summary-card';
+        sCard.addEventListener('click', () => openSummary(sum.id));
+        const moodIcon = sum.mood ? '<span class="summary-mood">' + sum.mood + '</span>' : '';
+        const weatherIcon = sum.weather ? '<span class="summary-weather">' + sum.weather + '</span>' : '';
+        const highlightHtml = sum.highlight ? '<p class="summary-highlight">' + escapeHtml(sum.highlight) + '</p>' : '';
+        const textPreview = sum.text ? (sum.text.length > 180 ? sum.text.slice(0, 180) + '…' : sum.text) : '';
+        const textHtml = textPreview ? '<p class="summary-text">' + escapeHtml(textPreview) + '</p>' : '';
+        const audioHtml = sum.audio && !sum.text ? '<div class="audio-mini"><i class="ti ti-volume"></i><span>Voice summary</span></div>' : '';
+        const tagBar = '<div class="summary-tagbar"><i class="ti ti-bookmark-filled"></i><span>Day summary</span>' + moodIcon + weatherIcon + '</div>';
+        sCard.innerHTML = tagBar + highlightHtml + textHtml + audioHtml;
+        list.appendChild(sCard);
       }
-      const tags = [];
-      if (e.photo) tags.push('photo');
-      if (e.audio) tags.push('audio');
-      if (e.text) tags.push('written');
-      const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
-      const metaHtml = locText
-        ? '<div class="card-meta"><i class="ti ti-map-pin"></i><span>'+escapeHtml(locText)+'</span><span class="spacer">'+fmtDate(e.ts)+'</span></div>'
-        : '<div class="card-meta"><span class="spacer">'+fmtDate(e.ts)+'</span></div>';
-      const photoHtml = e.photo ? '<img src="'+e.photo+'"/>' : '';
-      const textHtml = e.text ? '<p>'+escapeHtml(e.text)+'</p>' : '';
-      const audioOnlyHtml = (e.audio && !e.text) ? '<div style="display:flex; align-items:center; gap:8px; padding:10px; background:#FEFCE8; border-radius:10px;"><i class="ti ti-volume" style="font-size:16px; color:#1F2937;"></i><span style="font-size:13px; color:#6b6b6e;">Audio note</span></div>' : '';
-      const tagsHtml = tags.length ? '<div class="tag-row">' + tags.map(t => '<span class="tag">'+t+'</span>').join('') + '</div>' : '';
-      card.innerHTML = metaHtml + photoHtml + textHtml + audioOnlyHtml + tagsHtml;
-      list.appendChild(card);
+
+      // Entries from this day
+      const dayEntries = entriesForDay(key);
+      dayEntries.forEach(e => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        if (selectionMode) {
+          card.classList.add('selectable');
+          if (selectedIds.has(e.id)) card.classList.add('selected');
+          card.addEventListener('click', () => toggleSelection(e.id));
+        } else {
+          card.addEventListener('click', () => openDetail(e.id));
+        }
+        const tags = [];
+        if (e.photo) tags.push('photo');
+        if (e.audio) tags.push('audio');
+        if (e.text) tags.push('written');
+        const locText = e.placeName || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
+        const timeOnly = new Date(e.ts).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+        const metaHtml = locText
+          ? '<div class="card-meta"><i class="ti ti-map-pin"></i><span>'+escapeHtml(locText)+'</span><span class="spacer">'+timeOnly+'</span></div>'
+          : '<div class="card-meta"><span class="spacer">'+timeOnly+'</span></div>';
+        const photoHtml = e.photo ? '<img src="'+e.photo+'"/>' : '';
+        const textHtml = e.text ? '<p>'+escapeHtml(e.text)+'</p>' : '';
+        const audioOnlyHtml = (e.audio && !e.text) ? '<div style="display:flex; align-items:center; gap:8px; padding:10px; background:#FEFCE8; border-radius:10px;"><i class="ti ti-volume" style="font-size:16px; color:#1F2937;"></i><span style="font-size:13px; color:#6b6b6e;">Audio note</span></div>' : '';
+        const tagsHtml = tags.length ? '<div class="tag-row">' + tags.map(t => '<span class="tag">'+t+'</span>').join('') + '</div>' : '';
+        card.innerHTML = metaHtml + photoHtml + textHtml + audioOnlyHtml + tagsHtml;
+        list.appendChild(card);
+      });
     });
+  }
+
+  function updateSummaryBadge() {
+    const btn = document.querySelector('[data-new]');
+    if (!btn) return;
+    const hour = new Date().getHours();
+    const isEvening = hour >= 18 || hour < 4; // 6 PM to 4 AM
+    const todayHasSummary = !!summaryForDay(todayKey());
+    const todayHasActivity = entries.some(e => dateKey(e.ts) === todayKey());
+    const shouldNudge = isEvening && !todayHasSummary && todayHasActivity;
+    btn.classList.toggle('has-badge', shouldNudge);
   }
 
   function renderBundles() {
@@ -1503,7 +1823,7 @@
 
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.go)));
   document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', e => show(e.currentTarget.dataset.tab)));
-  document.querySelector('[data-new]').addEventListener('click', () => { resetDraft(); show('new'); });
+  document.querySelector('[data-new]').addEventListener('click', () => { show('compose'); });
 
   // Segment toggle
   document.querySelectorAll('.segment-btn').forEach(b => {
@@ -1683,6 +2003,200 @@
     persist();
     resetDraft();
     show('feed');
+  });
+
+  // ----- Day Summary editor -----
+  let summaryDraft = { id: null, dateKey: '', text: '', highlight: '', mood: '', weather: '', audio: '', photoIds: [] };
+  let summaryMediaRecorder = null;
+  let summaryChunks = [];
+  let summaryIsRecording = false;
+
+  function openSummaryEditor(forDateKey, existingId) {
+    const today = todayKey();
+    const key = forDateKey || today;
+    let existing = existingId ? summaries.find(s => s.id === existingId) : summaryForDay(key);
+    if (existing) {
+      summaryDraft = Object.assign({}, existing);
+      summaryDraft.photoIds = existing.photoIds || [];
+      document.getElementById('summary-edit-title').textContent = 'Edit summary';
+    } else {
+      summaryDraft = { id: null, dateKey: key, text: '', highlight: '', mood: '', weather: '', audio: '', photoIds: [] };
+      document.getElementById('summary-edit-title').textContent = 'Day summary';
+    }
+    document.getElementById('summary-date').value = summaryDraft.dateKey;
+    document.getElementById('summary-text').value = summaryDraft.text || '';
+    document.getElementById('summary-highlight').value = summaryDraft.highlight || '';
+    document.querySelectorAll('#mood-row .mood-chip').forEach(c => c.classList.toggle('selected', c.dataset.mood === summaryDraft.mood));
+    document.querySelectorAll('#weather-row .mood-chip').forEach(c => c.classList.toggle('selected', c.dataset.weather === summaryDraft.weather));
+    // Audio preview
+    const ap = document.getElementById('summary-audio-preview');
+    if (summaryDraft.audio) {
+      ap.innerHTML = '<audio controls src="'+summaryDraft.audio+'"></audio>';
+      ap.style.display = 'block';
+      document.getElementById('summary-rec-label').textContent = 'Re-record';
+    } else {
+      ap.innerHTML = ''; ap.style.display = 'none';
+      document.getElementById('summary-rec-label').textContent = 'Tap to record';
+    }
+    // Default to text mode
+    setSummaryMode('text');
+    renderSummaryContext();
+    show('summary-edit');
+  }
+
+  function setSummaryMode(mode) {
+    document.getElementById('mode-text-btn').classList.toggle('active', mode === 'text');
+    document.getElementById('mode-voice-btn').classList.toggle('active', mode === 'voice');
+    document.getElementById('summary-text').style.display = mode === 'text' ? '' : 'none';
+    document.getElementById('summary-record-area').style.display = mode === 'voice' ? '' : 'none';
+  }
+
+  function renderSummaryContext() {
+    const key = document.getElementById('summary-date').value || summaryDraft.dateKey;
+    const dayEntries = entries.filter(e => dateKey(e.ts) === key);
+    const dayPins = pins.filter(p => dateKey(p.ts) === key);
+    const ctx = document.getElementById('summary-context');
+    const label = document.getElementById('summary-context-label');
+    const text = document.getElementById('summary-context-text');
+    const photosWrap = document.getElementById('summary-context-photos');
+
+    if (dayEntries.length === 0 && dayPins.length === 0) {
+      ctx.style.display = 'none';
+      return;
+    }
+    ctx.style.display = 'block';
+    label.textContent = (key === todayKey() ? 'TODAY' : fmtDayHeader(key).toUpperCase()) + ' SO FAR';
+
+    // Collect distinct place names
+    const places = new Set();
+    dayEntries.forEach(e => { if (e.placeName) places.add(e.placeName); });
+    const parts = [];
+    if (dayEntries.length) parts.push(dayEntries.length + (dayEntries.length === 1 ? ' moment' : ' moments'));
+    if (dayPins.length) parts.push(dayPins.length + (dayPins.length === 1 ? ' check-in' : ' check-ins'));
+    if (places.size) parts.push('around ' + Array.from(places).slice(0, 3).join(', '));
+    text.textContent = parts.join(' · ');
+
+    // Photos from today's entries (tappable to include)
+    photosWrap.innerHTML = '';
+    dayEntries.filter(e => e.photo).forEach(e => {
+      const img = document.createElement('img');
+      img.src = e.photo;
+      img.className = 'ctx-photo';
+      if (summaryDraft.photoIds.includes(e.id)) img.classList.add('selected');
+      img.addEventListener('click', () => {
+        const idx = summaryDraft.photoIds.indexOf(e.id);
+        if (idx >= 0) summaryDraft.photoIds.splice(idx, 1);
+        else summaryDraft.photoIds.push(e.id);
+        img.classList.toggle('selected');
+      });
+      photosWrap.appendChild(img);
+    });
+  }
+
+  function openSummary(id) {
+    openSummaryEditor(null, id);
+  }
+
+  // Date change → refresh context preview
+  document.getElementById('summary-date').addEventListener('change', e => {
+    summaryDraft.dateKey = e.target.value;
+    summaryDraft.photoIds = []; // reset photo selections when changing day
+    renderSummaryContext();
+  });
+
+  // Mood chips
+  document.querySelectorAll('#mood-row .mood-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const val = chip.dataset.mood;
+      if (summaryDraft.mood === val) summaryDraft.mood = ''; // toggle off
+      else summaryDraft.mood = val;
+      document.querySelectorAll('#mood-row .mood-chip').forEach(c => c.classList.toggle('selected', c.dataset.mood === summaryDraft.mood));
+    });
+  });
+  document.querySelectorAll('#weather-row .mood-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const val = chip.dataset.weather;
+      if (summaryDraft.weather === val) summaryDraft.weather = '';
+      else summaryDraft.weather = val;
+      document.querySelectorAll('#weather-row .mood-chip').forEach(c => c.classList.toggle('selected', c.dataset.weather === summaryDraft.weather));
+    });
+  });
+
+  // Mode toggle
+  document.getElementById('mode-text-btn').addEventListener('click', () => setSummaryMode('text'));
+  document.getElementById('mode-voice-btn').addEventListener('click', () => setSummaryMode('voice'));
+
+  // Voice recording for summary
+  document.getElementById('summary-record-btn').addEventListener('click', async () => {
+    if (summaryIsRecording) { summaryMediaRecorder.stop(); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      summaryMediaRecorder = new MediaRecorder(stream);
+      summaryChunks = [];
+      summaryMediaRecorder.ondataavailable = e => { if (e.data.size > 0) summaryChunks.push(e.data); };
+      summaryMediaRecorder.onstop = () => {
+        const blob = new Blob(summaryChunks, { type: summaryMediaRecorder.mimeType || 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = ev => {
+          summaryDraft.audio = ev.target.result;
+          const ap = document.getElementById('summary-audio-preview');
+          ap.innerHTML = '<audio controls src="'+summaryDraft.audio+'"></audio>';
+          ap.style.display = 'block';
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+        summaryIsRecording = false;
+        document.getElementById('summary-rec-label').textContent = 'Re-record';
+        document.getElementById('summary-rec-icon').className = 'ti ti-microphone';
+        document.getElementById('summary-rec-icon').style.color = '#1F2937';
+      };
+      summaryMediaRecorder.start();
+      summaryIsRecording = true;
+      document.getElementById('summary-rec-label').textContent = 'Stop';
+      document.getElementById('summary-rec-icon').className = 'ti ti-player-stop';
+      document.getElementById('summary-rec-icon').style.color = '#d23f3f';
+    } catch (err) {
+      alert('Microphone access denied or not available.');
+    }
+  });
+
+  // Save summary
+  document.getElementById('save-summary-btn').addEventListener('click', () => {
+    summaryDraft.dateKey = document.getElementById('summary-date').value || todayKey();
+    summaryDraft.text = document.getElementById('summary-text').value;
+    summaryDraft.highlight = document.getElementById('summary-highlight').value;
+
+    if (!summaryDraft.text && !summaryDraft.audio && !summaryDraft.highlight && !summaryDraft.mood && !summaryDraft.weather) {
+      alert('Add something before saving.');
+      return;
+    }
+
+    // Replace existing summary for that day, or insert new
+    const existingIdx = summaries.findIndex(s => s.dateKey === summaryDraft.dateKey);
+    const record = {
+      id: summaryDraft.id || ('s_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)),
+      ts: Date.now(),
+      dateKey: summaryDraft.dateKey,
+      text: summaryDraft.text,
+      highlight: summaryDraft.highlight,
+      mood: summaryDraft.mood,
+      weather: summaryDraft.weather,
+      audio: summaryDraft.audio,
+      photoIds: summaryDraft.photoIds
+    };
+    if (existingIdx >= 0) summaries[existingIdx] = record;
+    else summaries.push(record);
+    persist();
+    show('feed');
+  });
+
+  // Compose chooser
+  document.getElementById('choose-entry-btn').addEventListener('click', () => {
+    resetDraft();
+    show('new');
+  });
+  document.getElementById('choose-summary-btn').addEventListener('click', () => {
+    openSummaryEditor();
   });
 
   // ----- Check-in button -----
