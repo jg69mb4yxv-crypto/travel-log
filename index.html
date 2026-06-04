@@ -747,6 +747,25 @@
 
 <div id="screens">
 
+  <!-- LOGIN -->
+  <div class="screen hidden" data-screen="login" style="background:#475A8A; padding: 60px 24px;">
+    <div style="text-align:center; margin-bottom: 32px;">
+      <p class="kicker" style="color: rgba(253,230,138,0.65); margin-bottom: 8px;">TRAVEL LOG</p>
+      <h1 style="color: #FDE68A; font-size: 28px; margin: 0;">Welcome back</h1>
+      <p style="color: rgba(255,255,255,0.75); font-size: 14px; margin: 8px 0 0; line-height: 1.5;">Sign in to sync your entries across devices.</p>
+    </div>
+
+    <div id="login-form-wrap" style="background:#fff; border-radius:16px; padding:20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+      <p style="margin: 0 0 12px; font-size: 13px; color: #6b6b6e; line-height: 1.5;">Enter your email and we'll send you a magic sign-in link. No password to remember.</p>
+      <input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email"
+        style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 0.5px solid #d8d8d4; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 12px;" />
+      <button class="accent-btn" id="login-send-btn" style="width: 100%; padding: 12px; font-size: 14px;">Send sign-in link</button>
+      <p id="login-status" style="margin: 12px 0 0; font-size: 12px; color: #6b6b6e; text-align: center; min-height: 16px;"></p>
+    </div>
+
+    <p style="color: rgba(255,255,255,0.55); font-size: 11px; text-align: center; margin-top: 24px; line-height: 1.5;">Your entries are stored privately in your account.<br/>Only you can see them.</p>
+  </div>
+
   <!-- FEED -->
   <div class="screen" data-screen="feed">
     <svg class="paper-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 400 800" aria-hidden="true">
@@ -983,6 +1002,18 @@
     <h2 class="bundle-detail-title" style="margin-bottom:20px;">Settings</h2>
 
     <div class="settings-section">
+      <h3>Account</h3>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <p class="settings-row-title" id="account-email">Signed in</p>
+          <p class="settings-row-desc">Your entries are synced to the cloud. Signing out keeps them safe in your account — sign back in any time to see them again.</p>
+          <p class="settings-row-desc" id="sync-status" style="color: #8a8a8e; margin-top: 6px;"></p>
+        </div>
+        <button class="select-btn" id="signout-btn" style="color:#b85050; border-color:#f3d3d3;">Sign out</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <h3>Location</h3>
       <div class="settings-row">
         <div class="settings-row-info">
@@ -1116,14 +1147,24 @@
   crossorigin=""></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 (function(){
+  // ===== Supabase config =====
+  const SUPABASE_URL = 'https://hvvrpxfbezdlorjsazbp.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dnJweGZiZXpkbG9yanNhemJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MTg4NDIsImV4cCI6MjA5NjA5NDg0Mn0.FPJZc4FTuPXsazGGfrtF8GPZ-G6OkiV98sOmfDntapQ';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let currentUser = null;
+  let syncInProgress = false;
+  let pendingChanges = false;
+
   const STORAGE_KEY = 'travel_log_entries_v1';
   const BUNDLES_KEY = 'travel_log_bundles_v1';
   const PINS_KEY = 'travel_log_pins_v1';
   const SETTINGS_KEY = 'travel_log_settings_v1';
   const SUMMARIES_KEY = 'travel_log_summaries_v1';
+  const MIGRATED_KEY = 'travel_log_migrated_v1';
   const AUTOPIN_MIN_INTERVAL_MS = 30 * 60 * 1000;
   const TRAIL_GAP_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -1182,6 +1223,154 @@
     renderFeed();
     renderBundles();
     if (leafletMap) renderMapPins();
+    // Sync to cloud (fire and forget; offline-safe)
+    if (currentUser) scheduleCloudSync();
+  }
+
+  // ===== Cloud sync =====
+  let syncTimer = null;
+  function scheduleCloudSync() {
+    pendingChanges = true;
+    if (syncTimer) return;
+    syncTimer = setTimeout(() => {
+      syncTimer = null;
+      runCloudSync();
+    }, 800); // debounce — batch quick successive changes
+  }
+
+  async function runCloudSync() {
+    if (!currentUser || syncInProgress) return;
+    syncInProgress = true;
+    pendingChanges = false;
+    updateSyncStatus('Syncing…');
+    try {
+      // Upsert everything. Supabase upsert is idempotent on primary key.
+      // For data size, we sync in parallel.
+      const userId = currentUser.id;
+      const [eRes, sRes, pRes, bRes, setRes] = await Promise.all([
+        supabase.from('entries').upsert(entries.map(e => ({
+          id: e.id, user_id: userId, ts: e.ts, text: e.text || null,
+          place_name: e.placeName || null, gps: e.gps || null,
+          photo: e.photo || null, audio: e.audio || null
+        }))),
+        supabase.from('summaries').upsert(summaries.map(s => ({
+          id: s.id, user_id: userId, ts: s.ts, date_key: s.dateKey,
+          text: s.text || null, highlight: s.highlight || null,
+          mood: s.mood || null, weather: s.weather || null,
+          audio: s.audio || null, photo_ids: s.photoIds || []
+        }))),
+        supabase.from('pins').upsert(pins.map(p => ({
+          id: p.id, user_id: userId, ts: p.ts,
+          lat: p.lat, lng: p.lng, source: p.source
+        }))),
+        supabase.from('bundles').upsert(bundles.map(b => ({
+          id: b.id, user_id: userId, ts: b.ts,
+          name: b.name, entry_ids: b.entryIds || []
+        }))),
+        supabase.from('user_settings').upsert({
+          user_id: userId, autopin_on_open: !!settings.autopinOnOpen, updated_at: new Date().toISOString()
+        })
+      ]);
+      const firstError = [eRes, sRes, pRes, bRes, setRes].find(r => r.error);
+      if (firstError) throw firstError.error;
+      updateSyncStatus('Synced just now');
+    } catch (err) {
+      console.error('Sync error:', err);
+      updateSyncStatus('Sync failed — will retry');
+      // retry once after a delay
+      setTimeout(() => { if (pendingChanges || true) scheduleCloudSync(); }, 5000);
+    } finally {
+      syncInProgress = false;
+      // If more changes happened during the sync, schedule another pass
+      if (pendingChanges) scheduleCloudSync();
+    }
+  }
+
+  async function pullFromCloud() {
+    if (!currentUser) return;
+    updateSyncStatus('Loading from cloud…');
+    try {
+      const userId = currentUser.id;
+      const [eRes, sRes, pRes, bRes, setRes] = await Promise.all([
+        supabase.from('entries').select('*').eq('user_id', userId),
+        supabase.from('summaries').select('*').eq('user_id', userId),
+        supabase.from('pins').select('*').eq('user_id', userId),
+        supabase.from('bundles').select('*').eq('user_id', userId),
+        supabase.from('user_settings').select('*').eq('user_id', userId).maybeSingle()
+      ]);
+      if (eRes.error) throw eRes.error;
+      if (sRes.error) throw sRes.error;
+      if (pRes.error) throw pRes.error;
+      if (bRes.error) throw bRes.error;
+
+      // Merge: cloud is authoritative on overlap; local-only items are uploaded on next sync
+      const cloudEntries = (eRes.data || []).map(r => ({
+        id: r.id, ts: r.ts, text: r.text || '', placeName: r.place_name || '',
+        gps: r.gps || null, photo: r.photo || '', audio: r.audio || ''
+      }));
+      const cloudSummaries = (sRes.data || []).map(r => ({
+        id: r.id, ts: r.ts, dateKey: r.date_key, text: r.text || '',
+        highlight: r.highlight || '', mood: r.mood || '', weather: r.weather || '',
+        audio: r.audio || '', photoIds: r.photo_ids || []
+      }));
+      const cloudPins = (pRes.data || []).map(r => ({
+        id: r.id, ts: r.ts, lat: r.lat, lng: r.lng, source: r.source
+      }));
+      const cloudBundles = (bRes.data || []).map(r => ({
+        id: r.id, ts: r.ts, name: r.name, entryIds: r.entry_ids || []
+      }));
+
+      // Local-first merge by id
+      const mergeById = (local, cloud) => {
+        const map = new Map();
+        local.forEach(x => map.set(x.id, x));
+        cloud.forEach(x => map.set(x.id, x)); // cloud wins on conflict
+        return Array.from(map.values());
+      };
+      entries = mergeById(entries, cloudEntries);
+      summaries = mergeById(summaries, cloudSummaries);
+      pins = mergeById(pins, cloudPins);
+      bundles = mergeById(bundles, cloudBundles);
+      if (setRes.data) settings.autopinOnOpen = !!setRes.data.autopin_on_open;
+
+      // Save merged local cache
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      localStorage.setItem(BUNDLES_KEY, JSON.stringify(bundles));
+      localStorage.setItem(PINS_KEY, JSON.stringify(pins));
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      localStorage.setItem(SUMMARIES_KEY, JSON.stringify(summaries));
+
+      // If any local-only items existed, push them up
+      if (entries.length > cloudEntries.length || summaries.length > cloudSummaries.length ||
+          pins.length > cloudPins.length || bundles.length > cloudBundles.length) {
+        scheduleCloudSync();
+      }
+
+      renderFeed();
+      renderBundles();
+      if (leafletMap) renderMapPins();
+      updateSyncStatus('Synced just now');
+    } catch (err) {
+      console.error('Pull error:', err);
+      updateSyncStatus('Could not load from cloud — using local data');
+    }
+  }
+
+  function updateSyncStatus(text) {
+    const el = document.getElementById('sync-status');
+    if (el) el.textContent = text;
+  }
+
+  async function deleteFromCloud(table, ids) {
+    if (!currentUser) return;
+    if (!ids || (Array.isArray(ids) && ids.length === 0)) return;
+    try {
+      const filter = Array.isArray(ids) ? ids : [ids];
+      const { error } = await supabase.from(table).delete().in('id', filter).eq('user_id', currentUser.id);
+      if (error) throw error;
+    } catch (err) {
+      console.error('Delete error on', table, err);
+    }
   }
 
   function addPin(lat, lng, source) {
@@ -1452,6 +1641,7 @@
     document.getElementById('delete-bundle-btn').onclick = () => {
       if (!confirm('Delete this bundle? Your entries will not be deleted.')) return;
       bundles = bundles.filter(b => b.id !== id);
+      deleteFromCloud('bundles', id);
       persist();
       show('feed');
     };
@@ -1689,6 +1879,7 @@
     document.getElementById('delete-btn').onclick = () => {
       if (!confirm('Delete this entry?')) return;
       entries = entries.filter(x => x.id !== id);
+      deleteFromCloud('entries', id);
       persist();
       show('feed');
     };
@@ -2238,6 +2429,9 @@
     document.getElementById('pins-stat').textContent =
       (pins.length + entries.filter(e => e.gps).length) + ' trail points · ' +
       pins.length + ' pin' + (pins.length === 1 ? '' : 's');
+    if (currentUser) {
+      document.getElementById('account-email').textContent = currentUser.email;
+    }
   }
 
   document.getElementById('autopin-toggle').addEventListener('click', () => {
@@ -2249,15 +2443,98 @@
   document.getElementById('clear-pins-btn').addEventListener('click', () => {
     if (pins.length === 0) { alert('No pins to clear.'); return; }
     if (!confirm('Clear all ' + pins.length + ' check-in and auto-logged pins? Journal entries with GPS will not be affected.')) return;
+    const pinIds = pins.map(p => p.id);
     pins = [];
+    deleteFromCloud('pins', pinIds);
     persist();
     renderSettings();
   });
 
-  renderFeed();
-  renderBundles();
-  // Auto-log on open if enabled (silent, fire-and-forget)
-  setTimeout(maybeAutoLogOnOpen, 1500);
+  // ===== Auth handlers =====
+  document.getElementById('login-send-btn').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const status = document.getElementById('login-status');
+    if (!email || !email.includes('@')) {
+      status.textContent = 'Please enter a valid email.';
+      return;
+    }
+    const btn = document.getElementById('login-send-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    status.textContent = '';
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: { emailRedirectTo: window.location.origin + window.location.pathname }
+      });
+      if (error) throw error;
+      status.style.color = '#1F2937';
+      status.innerHTML = '✓ Check your email for a sign-in link from Supabase.<br/><span style="color:#8a8a8e;">It may take a minute. Check spam if you don\'t see it.</span>';
+      btn.textContent = 'Send sign-in link';
+      btn.disabled = false;
+    } catch (err) {
+      status.style.color = '#b85050';
+      status.textContent = err.message || 'Could not send sign-in link. Try again.';
+      btn.textContent = 'Send sign-in link';
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('login-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('login-send-btn').click();
+  });
+
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    if (!confirm('Sign out? Your entries stay safe in your account — sign back in any time.')) return;
+    await supabase.auth.signOut();
+    // Clear local cache so the next person on this device doesn't see prior user's data
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(BUNDLES_KEY);
+    localStorage.removeItem(PINS_KEY);
+    localStorage.removeItem(SUMMARIES_KEY);
+    location.reload();
+  });
+
+  function showLoginScreen() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.querySelector('[data-screen="login"]').classList.remove('hidden');
+    document.querySelector('.tab-bar').style.display = 'none';
+  }
+  function showAppAfterLogin() {
+    document.querySelector('.tab-bar').style.display = '';
+    const emailEl = document.getElementById('account-email');
+    if (emailEl && currentUser) emailEl.textContent = currentUser.email;
+    show('feed');
+  }
+
+  // ===== Bootstrap =====
+  (async function bootstrap() {
+    // Check session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && session.user) {
+      currentUser = session.user;
+      await pullFromCloud();
+      showAppAfterLogin();
+      setTimeout(maybeAutoLogOnOpen, 1500);
+    } else {
+      // No session — show login
+      showLoginScreen();
+    }
+
+    // Listen for auth state changes (e.g., user clicks magic link in email)
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        if (currentUser && currentUser.id === session.user.id) return; // already handled
+        currentUser = session.user;
+        await pullFromCloud();
+        showAppAfterLogin();
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        showLoginScreen();
+      }
+    });
+  })();
+
 })();
 </script>
 </body>
