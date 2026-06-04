@@ -678,6 +678,9 @@
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; margin: 18px 0;
   }
+  .export-grid.export-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .export-grid.export-grid-3 .export-btn { padding: 14px 6px; }
+  .export-grid.export-grid-3 .export-btn-sub { font-size: 9.5px; }
   .export-btn {
     background: #fff; border: 0.5px solid #E5E7EB;
     padding: 16px 10px; border-radius: 12px;
@@ -746,6 +749,30 @@
 <body>
 
 <div id="screens">
+
+  <!-- PUBLIC SHARE VIEWER (no login required) -->
+  <div class="screen hidden" data-screen="public-share" style="background:#475A8A; padding: 0;">
+    <div class="feed-content" id="share-view-content" style="padding: 28px 18px 40px; position: relative; z-index: 1; min-height: 100%;">
+      <!-- populated by JS -->
+    </div>
+    <svg class="paper-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" viewBox="0 0 400 800" aria-hidden="true" style="position:absolute; inset:0; pointer-events:none;">
+      <g fill="#F8FAFC">
+        <circle cx="55" cy="80" r="1.0" opacity="0.55"/><circle cx="130" cy="55" r="0.7" opacity="0.4"/><circle cx="210" cy="70" r="1.2" opacity="0.7"/><circle cx="285" cy="40" r="0.8" opacity="0.5"/><circle cx="350" cy="85" r="1.0" opacity="0.55"/>
+        <circle cx="40" cy="170" r="1.4" opacity="0.75"/><circle cx="180" cy="180" r="1.1" opacity="0.6"/><circle cx="325" cy="195" r="1.3" opacity="0.7"/>
+        <circle cx="145" cy="285" r="1.5" opacity="0.8"/><circle cx="295" cy="295" r="1.2" opacity="0.65"/>
+        <circle cx="115" cy="395" r="1.3" opacity="0.7"/><circle cx="345" cy="380" r="1.4" opacity="0.75"/>
+        <circle cx="215" cy="510" r="1.5" opacity="0.8"/>
+        <circle cx="280" cy="625" r="1.4" opacity="0.75"/>
+        <circle cx="225" cy="700" r="1.3" opacity="0.7"/>
+      </g>
+      <g stroke="#FDE68A" stroke-width="0.7" fill="none" opacity="0.55">
+        <path d="M 60 110 L 130 145 L 210 125 L 285 165 L 350 130"/>
+      </g>
+      <g fill="#FDE68A" opacity="0.95">
+        <circle cx="60" cy="110" r="2.4"/><circle cx="130" cy="145" r="2.6"/><circle cx="210" cy="125" r="2.4"/><circle cx="285" cy="165" r="2.2"/><circle cx="350" cy="130" r="2.5"/>
+      </g>
+    </svg>
+  </div>
 
   <!-- LOGIN -->
   <div class="screen hidden" data-screen="login" style="background:#475A8A; padding: 60px 24px;">
@@ -978,16 +1005,21 @@
     <h2 class="bundle-detail-title" id="bundle-detail-title">Bundle</h2>
     <p class="bundle-detail-meta" id="bundle-detail-meta">0 entries</p>
 
-    <div class="export-grid">
+    <div class="export-grid export-grid-3">
       <button class="export-btn" id="export-pdf-btn">
         <i class="ti ti-file-text"></i>
-        <span class="export-btn-label">Export as PDF</span>
+        <span class="export-btn-label">PDF</span>
         <span class="export-btn-sub">Multi-page journal</span>
       </button>
       <button class="export-btn" id="export-image-btn">
         <i class="ti ti-photo"></i>
-        <span class="export-btn-label">Export as image</span>
-        <span class="export-btn-sub">Single shareable card</span>
+        <span class="export-btn-label">Image</span>
+        <span class="export-btn-sub">Single card</span>
+      </button>
+      <button class="export-btn" id="share-link-btn">
+        <i class="ti ti-link"></i>
+        <span class="export-btn-label">Share link</span>
+        <span class="export-btn-sub">Live web view</span>
       </button>
     </div>
 
@@ -1022,6 +1054,17 @@
           <p class="settings-row-desc" id="autopin-note" style="display:none;">Your iPhone may ask for location permission the first time. Pins are stored only on this device.</p>
         </div>
         <div class="toggle" id="autopin-toggle"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Shared bundles</h3>
+      <div id="shares-list">
+        <div class="settings-row" id="shares-empty">
+          <div class="settings-row-info">
+            <p class="settings-row-desc">No active share links yet. Open a bundle to share it.</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1407,7 +1450,10 @@
     });
     if (name === 'map') initOrUpdateMap();
     if (name === 'feed' && selectionMode) exitSelectionMode();
-    if (name === 'settings') renderSettings();
+    if (name === 'settings') {
+      renderSettings();
+      loadShares().then(renderSharesList);
+    }
   }
 
   function fmtDate(ts) {
@@ -2450,6 +2496,198 @@
     renderSettings();
   });
 
+  // ===== Share links =====
+  let activeShares = []; // cached locally per session
+
+  function genShareToken() {
+    // 24 chars of url-safe random
+    const arr = new Uint8Array(18);
+    crypto.getRandomValues(arr);
+    return btoa(String.fromCharCode.apply(null, arr))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  async function createShareLink(bundleId) {
+    if (!currentUser) { alert('Sign in required.'); return null; }
+    const token = genShareToken();
+    const { error } = await supabase.from('shares').insert({
+      token: token,
+      user_id: currentUser.id,
+      bundle_id: bundleId
+    });
+    if (error) {
+      console.error(error);
+      alert('Could not create share link. Try again.');
+      return null;
+    }
+    return token;
+  }
+
+  async function loadShares() {
+    if (!currentUser) { activeShares = []; return; }
+    const { data, error } = await supabase.from('shares')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .is('revoked_at', null)
+      .order('created_at', { ascending: false });
+    if (error) { console.error(error); activeShares = []; return; }
+    activeShares = data || [];
+  }
+
+  async function revokeShare(token) {
+    if (!confirm('Revoke this share link? Anyone who has it will no longer be able to open it.')) return;
+    const { error } = await supabase.from('shares')
+      .update({ revoked_at: new Date().toISOString() })
+      .eq('token', token)
+      .eq('user_id', currentUser.id);
+    if (error) { alert('Could not revoke. Try again.'); return; }
+    await loadShares();
+    renderSharesList();
+  }
+
+  function renderSharesList() {
+    const list = document.getElementById('shares-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (activeShares.length === 0) {
+      list.innerHTML = '<div class="settings-row"><div class="settings-row-info"><p class="settings-row-desc">No active share links yet. Open a bundle to share it.</p></div></div>';
+      return;
+    }
+    activeShares.forEach(s => {
+      const bundle = bundles.find(b => b.id === s.bundle_id);
+      const name = bundle ? bundle.name : '(deleted bundle)';
+      const created = new Date(s.created_at).toLocaleDateString();
+      const views = s.view_count || 0;
+      const row = document.createElement('div');
+      row.className = 'settings-row';
+      row.innerHTML =
+        '<div class="settings-row-info">' +
+          '<p class="settings-row-title">' + escapeHtml(name) + '</p>' +
+          '<p class="settings-row-desc">Shared ' + created + ' · ' + views + (views === 1 ? ' view' : ' views') + '</p>' +
+        '</div>' +
+        '<button class="select-btn revoke-btn" data-token="' + s.token + '" style="color:#b85050; border-color:#f3d3d3;">Revoke</button>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.revoke-btn').forEach(b => {
+      b.addEventListener('click', e => revokeShare(e.currentTarget.dataset.token));
+    });
+  }
+
+  document.getElementById('share-link-btn').addEventListener('click', async () => {
+    const bundle = bundles.find(b => b.id === currentBundleId);
+    if (!bundle) return;
+    showOverlay('Creating share link…');
+    const token = await createShareLink(bundle.id);
+    hideOverlay();
+    if (!token) return;
+    const url = window.location.origin + window.location.pathname + '?share=' + token;
+    // Try Web Share API for native sheet
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: bundle.name,
+          text: 'I shared a trip with you: ' + bundle.name,
+          url: url
+        });
+      } catch(err) {
+        if (err.name !== 'AbortError') {
+          // fallback: copy
+          await fallbackCopy(url);
+        }
+      }
+    } else {
+      await fallbackCopy(url);
+    }
+  });
+
+  async function fallbackCopy(url) {
+    try {
+      await navigator.clipboard.writeText(url);
+      alert('Share link copied to clipboard:\n\n' + url);
+    } catch(e) {
+      prompt('Copy this link to share:', url);
+    }
+  }
+
+  // ===== Public share viewer (no auth) =====
+  async function loadAndShowPublicShare(token) {
+    document.querySelector('.tab-bar').style.display = 'none';
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    const view = document.querySelector('[data-screen="public-share"]');
+    view.classList.remove('hidden');
+    const content = document.getElementById('share-view-content');
+    content.innerHTML = '<div style="text-align:center; padding:60px 20px; color:#FDE68A;"><i class="ti ti-loader-2" style="font-size:36px; animation: spin 1s linear infinite;"></i><p style="margin-top:16px;">Loading shared trip…</p></div>';
+
+    const { data, error } = await supabase.rpc('get_shared_bundle', { p_token: token });
+    if (error || !data) {
+      content.innerHTML =
+        '<div style="text-align:center; padding:80px 20px; color:rgba(255,255,255,0.85);">' +
+          '<i class="ti ti-link-off" style="font-size:44px; color:rgba(253,230,138,0.5);"></i>' +
+          '<p style="margin:18px 0 4px; font-size:16px;">This link doesn\'t work</p>' +
+          '<p style="font-size:13px; color:rgba(255,255,255,0.55);">It may have been revoked, or the bundle was deleted.</p>' +
+        '</div>';
+      return;
+    }
+    renderPublicShare(data);
+  }
+
+  function renderPublicShare(payload) {
+    const bundle = payload.bundle;
+    const entries = (payload.entries || []).slice().sort((a,b) => a.ts - b.ts);
+    const summaries = payload.summaries || [];
+    const pins = payload.pins || [];
+
+    const content = document.getElementById('share-view-content');
+    let html = '';
+
+    // Header
+    html += '<p class="kicker" style="color:rgba(253,230,138,0.65);">SHARED TRIP</p>';
+    html += '<h1 style="color:#FDE68A; font-size:28px; margin:4px 0 6px;">' + escapeHtml(bundle.name) + '</h1>';
+    html += '<p style="color:rgba(255,255,255,0.65); font-size:13px; margin:0 0 24px;">' + entries.length + (entries.length === 1 ? ' moment' : ' moments') + (summaries.length ? ' · ' + summaries.length + (summaries.length === 1 ? ' summary' : ' summaries') : '') + '</p>';
+
+    // Group entries by day, mix in summaries
+    const dayKeys = new Set();
+    entries.forEach(e => dayKeys.add(dateKey(e.ts)));
+    summaries.forEach(s => dayKeys.add(s.date_key));
+    const sortedDays = Array.from(dayKeys).sort();
+
+    sortedDays.forEach(key => {
+      // Header
+      html += '<div class="day-header"><span class="day-header-label">' + escapeHtml(fmtDayHeader(key)) + '</span><span class="day-header-line"></span></div>';
+
+      // Summary for the day
+      const sum = summaries.find(s => s.date_key === key);
+      if (sum) {
+        const mood = sum.mood ? '<span class="summary-mood">' + sum.mood + '</span>' : '';
+        const weather = sum.weather ? '<span class="summary-weather">' + sum.weather + '</span>' : '';
+        const highlight = sum.highlight ? '<p class="summary-highlight">' + escapeHtml(sum.highlight) + '</p>' : '';
+        const text = sum.text ? '<p class="summary-text">' + escapeHtml(sum.text) + '</p>' : '';
+        const audio = sum.audio ? '<audio controls src="' + sum.audio + '" style="width:100%; margin-top:8px;"></audio>' : '';
+        html += '<div class="summary-card">' +
+          '<div class="summary-tagbar"><i class="ti ti-bookmark-filled"></i><span>Day summary</span>' + mood + weather + '</div>' +
+          highlight + text + audio +
+          '</div>';
+      }
+
+      // Entries for that day
+      const dayEntries = entries.filter(e => dateKey(e.ts) === key);
+      dayEntries.forEach(e => {
+        const locText = e.place_name || (e.gps ? e.gps.lat.toFixed(3)+', '+e.gps.lng.toFixed(3) : '');
+        const timeOnly = new Date(e.ts).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+        const meta = locText
+          ? '<div class="card-meta"><i class="ti ti-map-pin"></i><span>' + escapeHtml(locText) + '</span><span class="spacer">' + timeOnly + '</span></div>'
+          : '<div class="card-meta"><span class="spacer">' + timeOnly + '</span></div>';
+        const photo = e.photo ? '<img src="' + e.photo + '" style="width:100%; border-radius:10px; margin-bottom:10px;"/>' : '';
+        const text = e.text ? '<p>' + escapeHtml(e.text) + '</p>' : '';
+        const audio = e.audio ? '<audio controls src="' + e.audio + '" style="width:100%; margin-top:8px;"></audio>' : '';
+        html += '<div class="card" style="cursor:default;">' + meta + photo + text + audio + '</div>';
+      });
+    });
+
+    html += '<p style="text-align:center; color:rgba(255,255,255,0.4); font-size:11px; margin-top:32px;">Shared via Travel Log · <a href="' + window.location.origin + window.location.pathname + '" style="color:rgba(253,230,138,0.7);">Make your own</a></p>';
+    content.innerHTML = html;
+  }
+
   // ===== Auth handlers =====
   document.getElementById('login-send-btn').addEventListener('click', async () => {
     const email = document.getElementById('login-email').value.trim();
@@ -2509,6 +2747,14 @@
 
   // ===== Bootstrap =====
   (async function bootstrap() {
+    // If URL has ?share=TOKEN, show public viewer (no auth)
+    const urlParams = new URLSearchParams(window.location.search);
+    const shareToken = urlParams.get('share');
+    if (shareToken) {
+      await loadAndShowPublicShare(shareToken);
+      return;
+    }
+
     // Check session
     const { data: { session } } = await supabase.auth.getSession();
     if (session && session.user) {
@@ -2517,14 +2763,12 @@
       showAppAfterLogin();
       setTimeout(maybeAutoLogOnOpen, 1500);
     } else {
-      // No session — show login
       showLoginScreen();
     }
 
-    // Listen for auth state changes (e.g., user clicks magic link in email)
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session && session.user) {
-        if (currentUser && currentUser.id === session.user.id) return; // already handled
+        if (currentUser && currentUser.id === session.user.id) return;
         currentUser = session.user;
         await pullFromCloud();
         showAppAfterLogin();
